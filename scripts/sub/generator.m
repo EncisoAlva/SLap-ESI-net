@@ -19,10 +19,10 @@ setappdata(f,'canceling',0);
 %% SETUP
 
 scriptsPath = pwd;
-addpath(pwd)
+addpath( scriptsPath, [scriptsPath,'\sub'] )
 cd('..')
 basePath  = pwd;
-cd('./data')
+cd('.\data')
 mkdir(info.BaseName)
 cd(info.BaseName)
 
@@ -44,6 +44,9 @@ meta.Cortex.Normals  = cortex.VertNormals;
 meta.Scalp.Vertices  = head.Vertices*1000;
 meta.Scalp.Faces     = head.Faces;
 meta.Scalp.Normals   = head.VertNormals;
+
+% remove removed channels (absent by default, didn't noticed before)
+forward.Gain(any(isnan(forward.Gain), 2), :) = [];
 
 % leadfield matrix and general info
 meta.nChans  = size(forward.Gain,1);
@@ -224,7 +227,7 @@ meta.V  = V;
 
 % redundancy
 meta.info = info;
-save("metadata","meta");
+save("metadata","meta", "-v7.3");
 save("metadata2","info");
 
 %% MAIN LOOP

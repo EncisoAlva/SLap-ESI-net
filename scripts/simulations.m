@@ -1,4 +1,4 @@
-% Round of simulations started on April/26/2024
+% Round of simulations started on August/13/2024
 %
 % Source patch has an effective are of 5 cm^2, never p
 % laced on the sulci.
@@ -11,6 +11,7 @@ info = [];
 % forward model
 info.OGforward  = 'asa_10_10_vol_BEM_5k';
 info.OGanatomy  = 'icbm152anatomy';
+info.OGelec     = 'icbm152_10_10_elec';
 
 info.SourceType = 'volume';
 
@@ -34,6 +35,10 @@ info.debugCoord = [47.353, 18.555, 113.019];
 
 info.print_all = false;
 
+%% 
+% Preprocessing for Spline Laplacian
+pre_laplace(info);
+
 %% CLOSE BROKEN WAITBARS
 F = findall(0,'type','figure','tag','TMWWaitbar');
 delete(F)
@@ -45,31 +50,14 @@ delete(F)
 %      gauss  ||J_n|| = exp( - dist(n, n*)^2 / 2*k^2 )
 %       circ  ||J_n|| = sqrt( 1 - [ dist(n, n*) / k ]^2 )
 
-% SQUARE PROFILE
-info.BaseName      = [info.tagName, '_gauss'];
-info.SourceProfile = 'gauss';
-%generator(info);
-evaluator(info);
-collector(info);
+profiles = {'square', 'gauss', 'exp', 'circ'};
 
-% GAUSSIAN PROFILE
-info.BaseName      = [info.tagName, '_exp'];
-info.SourceProfile = 'exp';
-%generator(info);
-evaluator(info);
-collector(info);
-
-% EXPONENTIAL PROFILE
-info.BaseName      = [info.tagName, '_circ'];
-info.SourceProfile = 'circ';
-%generator(info);
-evaluator(info);
-collector(info);
-
-% POLYNOMIAL PROFILE
-info.BaseName   = 'protocol04_30_single_circ';
-info.SourceProfile = 'circ';
-%generator(info);
-evaluator(info);
-collector(info);
-
+for i = 1:length(profiles)
+  curr_profile = profiles{i};
+  info.BaseName      = [info.tagName, '_', curr_profile];
+  info.SourceProfile = curr_profile;
+  %
+  %generator(info);
+  evaluator(info);
+  collector(info);
+end
