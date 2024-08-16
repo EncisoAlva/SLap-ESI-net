@@ -1,3 +1,20 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% sphlap0.m - Auxiliar function to compute spherical splines
+%
+% Usage: [K, LapK, T, Q1, Q2, R] = sphlap0(xyz, m, tol);
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Required Inputs
+%        xyz   electrode coordinates (must be on a sphere)
+%          m   interpolation order (2<=m<=6)
+% Optional Input
+%        tol   error tolerance in the estimate of the Legendre 
+%              polynomials. Default is 1e-10.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Output
+% K, LapK, T, Q1, Q2, R   matrices required to implement spherical splines
+%
+
 %% CREDIT
 % Claudio Carvalhaes, J. Acacio de Barros,
 % The surface Laplacian technique in EEG: Theory and methods,
@@ -8,31 +25,19 @@
 % ISSN 0167-8760,
 % https://doi.org/10.1016/j.ijpsycho.2015.04.023.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% sphlap0.m - Auxiliar function to compute spherical splines
-%
-% Usage: [K, LapK, T, Q1, Q2, R] = sphlap0(x, y, z, m, tol);
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Required Inputs
-%    x, y, z   electrode coordinates (must be on a sphere)
-%          m   interpolation order (2<=m<=6)
-% Optional Input
-%        tol   error tolerance in the estimate of the Legendre 
-%              polynomials. Default is 1e-10.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Output
-% K, LapK, T, Q1, Q2, R   matrices required to implement spherical splines
-%
+%% CHANGES
+% 2024-Aug  The max order of Legendre polynomial is part of the output.
+% 2024-Aug  The input is a Nx3 matrix, instead of 3 Nx1 matrices.
+%           Modification by Enciso-Alva.
 
-function [K, LapK, T, Q1, Q2, R, tol] = sphlap0(x, y, z, m, tol)
+function [K, LapK, T, Q1, Q2, R, max_n, tol] = sphlap0(xyz_, m, tol)
 
 % Handle arguments
-if nargin < 4
+if nargin < 2
   help sphlap0.m;
   return;
 end
-if nargin == 4
+if nargin == 2
   tol = 1e-10;
 end
 if m < 2 || m > 6
@@ -41,10 +46,17 @@ if m < 2 || m > 6
     '2 and 6');
 end
 
-r = hypot(z, hypot(x, y)); % head radius
-N = length(x); % number of electrodes
+% transpose if needed
+if size(xyz_,2) ~= 3
+  xyz = xyz_';
+else
+  xyz = xyz_;
+end
 
-sqdist = pdist([x(:) y(:) z(:)], 'euclidean').^2; % square distances between electrodes
+r = hypot(xyz(:,3), hypot(xyz(:,1), xyz(:,2))); % head radius
+N = size(xyz, 1); % number of electrodes
+
+sqdist = pdist(xyz, 'euclidean').^2; % square distances between electrodes
 dr2 =  squareform(sqdist); % convert distances to matrix form
 r2  = r(1)^2; % squared head radius
 cos_gamma = 1 - dr2/(2*r2); % angle between electrodes
@@ -54,7 +66,6 @@ if any ((cos_gamma(:) > 1) | (cos_gamma (:) < -1))
     'Something is wrong with the electrode coordinates. %s', ...
     'Are they on located on a sphere?');
 end
-
 
 G    = []; 
 LapG = [];
@@ -72,6 +83,7 @@ while (tol < epsilon)
   G0 = G(:,end);
   n = n + 1;
 end
+max_n = n-1;
 
 tol = epsilon; % final error tolerance
 

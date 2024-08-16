@@ -41,7 +41,7 @@ lap.nElec = size( lap.Elec, 2 );
 
 lap.OGpos = zeros( lap.nElec, 3 );
 for i = 1:lap.nElec
-  lap.OGpos(i,:) = lap.Elec(i).Loc';
+  lap.OGpos(i,:) = lap.Elec(i).Loc'*1000;
 end
 
 % initialization
@@ -76,18 +76,46 @@ for i = 1:lap.nElec
   lap.SPHpos(i,:)  = lap.SPHpos0(i,:) + lap.SPHcenter;
 end
 
+% new points on a 'good' mesh
+% TEMPORARY: using an icosahedron instead of a 9x9 grid
+icos = [ 
+ 1.000000,  0.000000, -0.618034 ; 
+ 1.000000, -0.000000,  0.618034 ; 
+-1.000000, -0.000000,  0.618034 ; 
+-1.000000,  0.000000, -0.618034 ; 
+ 0.000000, -0.618034,  1.000000 ; 
+ 0.000000,  0.618034,  1.000000 ; 
+ 0.000000,  0.618034, -1.000000 ; 
+ 0.000000, -0.618034, -1.000000 ; 
+-0.618034, -1.000000, -0.000000 ; 
+ 0.618034, -1.000000, -0.000000 ; 
+ 0.618034,  1.000000,  0.000000 ; 
+-0.618034,  1.000000,  0.000000 ; 
+];
+tmp = vecnorm(icos,2,2);
+lap.MESHpos0 = lap.SPHradius*icos / tmp(1);
+lap.MESHpos  = lap.SPHcenter + lap.MESHpos0;
+
 if info.debugFigs
+  figure()
   scatter3(lap.OGpos(:,1), lap.OGpos(:,2), lap.OGpos(:,3), "filled")
   hold on
   scatter3(lap.SPHpos(:,1), lap.SPHpos(:,2), lap.SPHpos(:,3), "filled")
+  scatter3(lap.MESHpos(:,1), lap.MESHpos(:,2), lap.MESHpos(:,3), "filled")
+  xlabel('1: Anterior->Posterior [mm]')
+  ylabel('2: Right->Left [mm]')
+  zlabel('3: Inferior->Superior [mm]')
+  legend({'Electrode Positions (original)', ...
+          'Electrode Positions (projected)', 'Spherical Grid'}, ...
+          "Location","south")
 end
 
 %% 2. SPLINE LAPLACIAN
-[K, LapK, T, Q1, Q2, R, ~] = sphlap0(...
-  lap.SPHpos0(:,1), ...
-  lap.SPHpos0(:,2), ...
-  lap.SPHpos0(:,3), ...
-  4, 1e-10);
+
+% interpolation of splines from electrode positions
+[K_0, LapK_0, T, Q1, Q2, R, max_n, ~] = sphlap0( lap.SPHpos0, 4, 1e-10);
+
+[K_F, LapK_f ] = sphlap_interp( lap.SPHpos0, lap.MESHpos0, 4, max_n);
 
 [S, L] = sphlap (K, LapK, T, Q1, Q2, R, 1);
 
