@@ -15,8 +15,8 @@ function pre_laplace(info)
 %
 
 counter = 0;
-f = waitbar(counter,'Computing general parameters, including SVD of leadfield matrix',...
-  'Name','Computing synthetic data',...
+f = waitbar(counter,'Computing Spline and Spline Laplacian...',...
+  'Name','Computing Spline Laplacian',...
   'CreateCancelBtn','setappdata(gcbf,''canceling'',1)');
 setappdata(f,'canceling',0);
 
@@ -77,24 +77,28 @@ for i = 1:lap.nElec
 end
 
 % new points on a 'good' mesh
-% TEMPORARY: using an icosahedron instead of a 9x9 grid
-icos = [ 
- 1.000000,  0.000000, -0.618034 ; 
- 1.000000, -0.000000,  0.618034 ; 
--1.000000, -0.000000,  0.618034 ; 
--1.000000,  0.000000, -0.618034 ; 
- 0.000000, -0.618034,  1.000000 ; 
- 0.000000,  0.618034,  1.000000 ; 
- 0.000000,  0.618034, -1.000000 ; 
- 0.000000, -0.618034, -1.000000 ; 
--0.618034, -1.000000, -0.000000 ; 
- 0.618034, -1.000000, -0.000000 ; 
- 0.618034,  1.000000,  0.000000 ; 
--0.618034,  1.000000,  0.000000 ; 
-];
-tmp = vecnorm(icos,2,2);
-lap.MESHpos0 = lap.SPHradius*icos / tmp(1);
+NN = 20;
+[X,Y,Z] = sphere(NN-1);
+icos = zeros(NN*NN,3);
+icos(:,1) = X(:);
+icos(:,2) = Y(:);
+icos(:,3) = Z(:);
+icos = icos*lap.SPHradius;
+% remove poins far from electrodes
+sqdist = pdist(lap.SPHpos0, 'euclidean');
+dr2 =  squareform(sqdist);
+mindis = zeros(lap.nElec,1);
+for ii = 1:lap.nElec
+  diss = dr2(ii,:);
+  mindis(ii) = min( diss(diss>0) );
+end
+avg_dist = median(mindis);
+sqdist = pdist2(lap.SPHpos0,icos, 'euclidean');
+dr2 = min(sqdist,[],1);
+%
+lap.MESHpos0 = icos(dr2<avg_dist,:);
 lap.MESHpos  = lap.SPHcenter + lap.MESHpos0;
+lap.nMesh    = size(lap.MESHpos0,1);
 
 if info.debugFigs
   figure()
@@ -112,16 +116,48 @@ end
 
 %% 2. SPLINE LAPLACIAN
 
-% interpolation of splines from electrode positions
+% constructions of splines from electrode pos, regularized via GCV
 [K_0, LapK_0, T, Q1, Q2, R, max_n, ~] = sphlap0( lap.SPHpos0, 4, 1e-10);
+best_lambda = 1;
+scale = 1;
+GCV = zeros(21,1);
+while scale > 1e-5
+  lambdas = best_lambda * (2.^((-scale):(scale/10):scale));
+  for j = 1:length(lambdas)
+    curr_lambda = lambdas(j);
+    [S_lam, ~, ~, ~] = sphlap (K_0, LapK_0, T, Q1, Q2, R, curr_lambda);
+    V = normrnd( 0, 1/sqrt(lap.nElec), lap.nElec, lap.nElec );
+    GCV(j) = norm( (S_lam -eye(lap.nElec))*V, 'fro')^2 / ...
+      ( 1 -trace(S_lam)/lap.nElec )^2 ;
+  end
+  %disp(GCV'-mean(GCV))
+  [G, idx] = min(GCV);
+  best_lambda = lambdas(idx);
+  fprintf("Best lambda : %2.4d   ;   avgGCV(*) : %2.3d \n", ...
+    best_lambda, (G-mean(GCV))/max(abs(GCV-mean(GCV))) )
+  if ( idx==1 )||( idx==length(lambdas) )
+    scale = scale*10;
+  else
+    scale = scale/10;
+  end
+end
+[~, ~, C, D] = sphlap (K_0, LapK_0, T, Q1, Q2, R, curr_lambda);
 
-[K_F, LapK_f ] = sphlap_interp( lap.SPHpos0, lap.MESHpos0, 4, max_n);
-
-[S, L] = sphlap (K, LapK, T, Q1, Q2, R, 1);
+% interpolation to grid points
+[K_F, LapK_F ] = sphlap0_interp( lap.SPHpos0, lap.MESHpos0, 4, max_n);
+[S, L] = sphlap_interp (K_F, LapK_F, C, D);
 
 lap.S = S;
 lap.L = L;
+lap.lambda = best_lambda;
+
+%% SAVE RESULTS
 
 save(['SLap_',info.OGanatomy,'_',info.OGelec],"lap", "-v7.3");
+cd(scriptsPath)
+
+clc
+
+delete(f)
 
 end

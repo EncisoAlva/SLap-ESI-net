@@ -1,13 +1,3 @@
-%% CREDIT
-% Claudio Carvalhaes, J. Acacio de Barros,
-% The surface Laplacian technique in EEG: Theory and methods,
-% International Journal of Psychophysiology,
-% Volume 97, Issue 3,
-% 2015,
-% Pages 174-188,
-% ISSN 0167-8760,
-% https://doi.org/10.1016/j.ijpsycho.2015.04.023.﻿
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % sphlap.m - Compute the smoother and Laplacian matrices using spherical
 %            splines.
@@ -23,7 +13,21 @@
 %                     S    the smoother matrix
 %                     L    the Laplacian matriz
 
-function [S, L] = sphlap (K, LapK, T, Q1, Q2, R, lambda)
+%% CREDIT
+% Claudio Carvalhaes, J. Acacio de Barros,
+% The surface Laplacian technique in EEG: Theory and methods,
+% International Journal of Psychophysiology,
+% Volume 97, Issue 3,
+% 2015,
+% Pages 174-188,
+% ISSN 0167-8760,
+% https://doi.org/10.1016/j.ijpsycho.2015.04.023.
+
+%% CHANGES
+% 2024-Aug  The output includes the coefficients, for later interpolation
+%           Modification by Enciso-Alva.
+
+function [S, L, C, D] = sphlap (K, LapK, T, Q1, Q2, R, lambda)
 
 % Handle arguments
 if nargin ~= 7
