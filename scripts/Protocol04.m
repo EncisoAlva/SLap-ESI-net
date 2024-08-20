@@ -37,16 +37,19 @@ if isempty(RES.idxCentShort)
 end
 
 % surface distance
-if strcmp( info.SourceType, 'surface' )
-  [~,GraphDist0] = shortestpathtree(meta.asGraph, result.idxCent, RES.idxShort0 );
-  RES.idxShort   = RES.idxShort0( GraphDist0 < maxDist );
-  RES.idxShort0  = [];
-  RES.nShort     = length( RES.idxShort );
-  RES.idxCentShort = find(result.idxCent == RES.idxShort,1);
-  if isempty(RES.idxCentShort)
-    [~,RES.idxCentShort] = min(vecnorm( meta.Gridloc(RES.idxShort,:) - result.IntendedCent, 2, 2));
-  end
-  [~,GraphDist] = shortestpathtree(meta.asGraph, result.idxCent, RES.idxShort );
+switch info.SourceType
+  case 'volume'
+    RES.idxShort   = RES.idxShort0;
+  case 'surface'
+    [~,GraphDist0] = shortestpathtree(meta.asGraph, result.idxCent, RES.idxShort0 );
+    RES.idxShort   = RES.idxShort0( GraphDist0 < maxDist );
+    RES.idxShort0  = [];
+    RES.nShort     = length( RES.idxShort );
+    RES.idxCentShort = find(result.idxCent == RES.idxShort,1);
+    if isempty(RES.idxCentShort)
+      [~,RES.idxCentShort] = min(vecnorm( meta.Gridloc(RES.idxShort,:) - result.IntendedCent, 2, 2));
+    end
+    [~,GraphDist] = shortestpathtree(meta.asGraph, result.idxCent, RES.idxShort );
 end
 
 % miscellanea
@@ -59,8 +62,14 @@ switch info.SourceType
 end
 
 % J, shortened to non-zero dipoles
-RES.time   = linspace(0,0,1);
-RES.Jshort = zeros(RES.nShort,1);
+RES.time       = linspace(0,0,1);
+RES.normJshort = zeros(RES.nShort,1);
+switch info.SourceType
+  case 'volume'
+    RES.Jshort = zeros(RES.nShort*3,1);
+  case 'surface'
+    RES.Jshort = zeros(RES.nShort,  1);
+end
 switch info.SourceProfile
   case 'square'
     switch info.SourceType
@@ -68,48 +77,48 @@ switch info.SourceProfile
         % geodesic distance in cortex
         for ii = 1:RES.nShort
           if GraphDist(ii) < result.kappa
-            RES.Jshort(ii) = 1;
+            RES.normJshort(ii) = 1;
           end
         end
+        RES.Jshort = RES.normJshort;
       case 'volume'
         % euclidian distance in 3D space
         for ii = 1:RES.nShort
           idx = RES.idxShort(ii); 
           if vecnorm( meta.Gridloc(idx,:) - result.IntendedCent, 2, 2 ) < result.kappa
-            RES.Jshort(ii) = 1;
+            RES.normJshort(ii) = 1;
           end
         end
+        RES.Jshort = kron(RES.normJshort, [1,1,1]');
     end
   case 'exp'
     switch info.SourceType
       case 'surface'
-        RES.Jshort = exp(- GraphDist /result.kappa);
+        RES.normJshort = exp(- GraphDist /result.kappa);
+        RES.Jshort = RES.normJshort;
       case 'volume'
-        RES.Jshort = exp(-vecnorm( meta.Gridloc(RES.idxShort,:) - result.IntendedCent, 2, 2 )/result.kappa);
+        RES.normJshort = exp(-vecnorm( meta.Gridloc(RES.idxShort,:) - result.IntendedCent, 2, 2 )/result.kappa);
+        RES.Jshort = kron(RES.normJshort, [1,1,1]');
     end
   case 'gauss'
     switch info.SourceType
       case 'surface'
-        RES.Jshort = exp(-( GraphDist ).^2/(2*(result.kappa^2)));
+        RES.normJshort = exp(-( GraphDist ).^2/(2*(result.kappa^2)));
+        RES.Jshort = RES.normJshort;
       case 'volume'
-        RES.Jshort = exp(-vecnorm( meta.Gridloc(RES.idxShort,:) - result.IntendedCent, 2, 2 ).^2/(2*(result.kappa^2)));
+        RES.normJshort = exp(-vecnorm( meta.Gridloc(RES.idxShort,:) - result.IntendedCent, 2, 2 ).^2/(2*(result.kappa^2)));
+        RES.Jshort = kron(RES.normJshort, [1,1,1]');
     end
   case 'circ'
     switch info.SourceType
       case 'surface'
-        RES.Jshort = ( 1 - min( GraphDist /result.kappa,1 ).^2 ).^(1/2);
+        RES.normJshort = ( 1 - min( GraphDist /result.kappa,1 ).^2 ).^(1/2);
+        RES.Jshort = RES.normJshort;
       case 'volume'
-        RES.Jshort = ( 1 - ...
+        RES.normJshort = ( 1 - ...
           min( vecnorm( meta.Gridloc(RES.idxShort,:) - result.IntendedCent, 2, 2 ) /result.kappa,1 ).^2 ).^(1/2);
+        RES.Jshort = kron(RES.normJshort, [1,1,1]');
     end
-end
-
-% the norm of J, also shortened to save space
-switch info.SourceType
-  case 'surface'
-    RES.normJshort = abs( RES.Jshort );
-  case 'volume'
-    RES.normJshort = dip_norm( RES.Jshort );
 end
 
 % debug figures
@@ -313,14 +322,9 @@ if size(RES.Jshort, 2) ~= 1
 end
 
 % Y, noiseless
-switch info.SourceType
-  case 'volume'
-    RES.Yclean = meta.Leadfield(:,RES.idxShortG) * kron( result.Orient, RES.Jshort );
-  case 'surface'
-    RES.Yclean = meta.Leadfield(:,RES.idxShortG) * RES.Jshort;
-end
-%RES.varY = vecnorm( meta.LeadfieldOG, 2, 2 );
-RES.varY = RES.Yclean.^2;
+RES.Yclean = meta.Leadfield(:,RES.idxShortG) * RES.Jshort;
+%RES.varY  = vecnorm( meta.LeadfieldOG, 2, 2 );
+RES.varY   = RES.Yclean.^2;
 
 % adding noise to a prescribed SNR
 if isinf(result.SNR)
@@ -334,6 +338,17 @@ RES.YOG = RES.Yclean + 10^(-result.SNR/10) * diag( RES.varY ) * noise;
 RES.Y   = RES.YOG - mean(RES.YOG,1);
 
 % true center of mass
-RES.TrueCent = RES.Jshort' * meta.Gridloc(RES.idxShort,:) / sum(RES.Jshort);
+RES.TrueCent = RES.normJshort' * meta.Gridloc(RES.idxShort,:) / sum(RES.normJshort);
+
+% for compression purposes, the source as a sparse matrix
+switch info.SourceType
+  case 'volume'
+    tmp = zeros(meta.nGridDips*3, size(RES.Y,2));
+  case 'surface'
+    tmp = zeros(meta.nGridDips,   size(RES.Y,2));
+    tmp(RES.idxShort) = sparse(RES.Jshort);
+end
+tmp(RES.idxShortG) = sparse(RES.Jshort);
+RES.Jsparse = tmp;
 
 end

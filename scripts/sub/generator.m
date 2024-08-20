@@ -33,6 +33,9 @@ TotTrials = info.nTrials*length(info.SNRvals);
 % forward model
 load([ basePath,'\anat_ref\', info.OGforward, '.mat'],'forward');
 load([ basePath,'\anat_ref\', info.OGanatomy, '.mat'],'cortex','head');
+%load([ basePath,'\anat_ref\', info.OGelec, '.mat'],'electrodes');
+load([ basePath,'\anat_ref\', ...
+  'SLap_',info.OGanatomy,'_',info.OGelec, '.mat'],'lap');
 
 % metadata
 meta = [];
@@ -273,6 +276,8 @@ for SNRi = info.SNRvals
     end
     %
     result.data = feval(info.ProtocolFun, meta, result, info);
+    result.data.SY = lap.S*result.data.Y;
+    result.data.SL = lap.L*result.data.Y;
     %
     FileName = ['file',num2str(idxRand,'%04d'),'.mat'];
     save(FileName,"result");
