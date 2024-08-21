@@ -77,7 +77,7 @@ for i = 1:lap.nElec
 end
 
 % new points on a 'good' mesh
-NN = 20;
+NN = info.nLapGrid;
 [X,Y,Z] = sphere(NN-1);
 icos = zeros(NN*NN,3);
 icos(:,1) = X(:);
