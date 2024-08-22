@@ -66,11 +66,18 @@ switch info.NetInput
     inFun = @customRead_SY;
   case "SLap"
     inFun = @customRead_SL;
+  case "WMNE"
+    inFun = @customRead_wmne;
   case "EEG_SLap"
     inFun = @customRead_SLSY;
+  case "EEG_WMNE"
+    inFun = @customRead_SYwmne;
   case "SLap_WMNE"
     inFun = @customRead_SLwmne;
+  case "EEG_SLap_WMNE"
+    inFun = @customRead_SLSYwmne;
 end
+inputss   = {"EEG_wMNE", "EEG_SLap_wMNE"};
 %
 dTrain_in  = datastore( dataStore.Files(idxTrain),...
     "Type","file", "ReadFcn", inFun );
@@ -107,7 +114,7 @@ opts = trainingOptions(...
   "sgdm",... % Stoch Grad Descent w/ Momentum
   Plots = "training-progress", ...
   GradientThreshold = 1e2, ...
-  MaxEpochs = 1000, ...
+  MaxEpochs = 500, ...
   Shuffle = "every-epoch", ...
   OutputNetwork = "best-validation", ...
   InitialLearnRate = 0.1, ...
@@ -127,7 +134,7 @@ switch info.TrainProfiles
   case "all"
     trainName = "all";
   otherwise
-    trainName = info.TrainProfiles{1};
+    trainName = info.TrainProfiles;
 end
 saveFile = strcat("net_", info.tagName, "_", trainName, "_", ...
   info.NetInput,".mat");

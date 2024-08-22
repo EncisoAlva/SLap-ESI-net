@@ -75,14 +75,23 @@ end
 %% training of model
 
 % opions
-info.TrainProfiles = "all"; % "circ"  "gauss" "all"
+info.TrainProfiles = "circ"; % "circ"  "gauss" "all"
 info.NetInput = "SLap_WMNE"; % "SLap", "EEG", "EEG_SLap" "SLap_WMNE"
 info.LossFun  = "l2loss"; % also 
 %
 info.propTrain = 0.75;
 info.propTest  = 0.2;
 
-trainSLapNN(info)
+profiles2 = {'square', 'gauss', 'exp', 'circ', 'all'};
+inputss   = {"SLap", "EEG", "WMNE", "EEG_SLap", "SLap_WMNE", "EEG_wMNE", "EEG_SLap_wMNE"};
+for ii = 1:5
+  info.TrainProfiles = profiles2{ii};
+  for jj = 1:6
+    info.NetInput = inputss{jj};
+    %
+    trainSLapNN(info)
+  end
+end
 
 %% evaluation
 %for idxProfile = 1:length(profiles)
