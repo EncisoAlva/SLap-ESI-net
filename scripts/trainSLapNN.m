@@ -64,8 +64,10 @@ switch info.NetInput
     inFun = @customRead_SY;
   case "SLap"
     inFun = @customRead_SL;
-  case "Both"
+  case "EEG_SLap"
     inFun = @customRead_SLSY;
+  case "SLap_WMNE"
+    inFun = @customRead_SLwmne;
 end
 %
 dTrain_in  = datastore( dataStore.Files(idxTrain),...

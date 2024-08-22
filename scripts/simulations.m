@@ -15,7 +15,7 @@ info.OGelec     = 'icbm152_10_10_elec';
 
 info.SourceType = 'volume';
 
-info.nTrials    = 1000;
+info.nTrials    = 100;
 info.SNRvals    = [Inf, 40, 30, 20, 10, 0];
 
 info.ProtocolFun   = 'Protocol04';
@@ -61,6 +61,7 @@ cd(originalPath)
 %      gauss  ||J_n|| = exp( - dist(n, n*)^2 / 2*k^2 )
 %       circ  ||J_n|| = sqrt( 1 - [ dist(n, n*) / k ]^2 )
 
+%profiles = {'square', 'gauss', 'exp', 'circ'};
 profiles = {'square', 'gauss', 'exp', 'circ'};
 
 for idxProfile = 1:length(profiles)
@@ -68,14 +69,14 @@ for idxProfile = 1:length(profiles)
   info.BaseName      = [info.tagName, '_', curr_profile];
   info.SourceProfile = curr_profile;
   %
-  generator(info);
+  generator2(info);
 end
 
 %% training of model
 
 % opions
-info.TrainProfiles = "circ"; % "circ"  "gauss" "all"
-info.NetInput = "Both"; % "SLap", "Both"
+info.TrainProfiles = "all"; % "circ"  "gauss" "all"
+info.NetInput = "SLap_WMNE"; % "SLap", "EEG", "EEG_SLap" "SLap_WMNE"
 info.LossFun  = "l2loss"; % also 
 
 trainSLapNN(info)
