@@ -2,3 +2,4 @@
 *.Rhistory
 data/*
 anat_ref/
+*net_*.mat

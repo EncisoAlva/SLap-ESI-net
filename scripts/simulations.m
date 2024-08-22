@@ -15,8 +15,8 @@ info.OGelec     = 'icbm152_10_10_elec';
 
 info.SourceType = 'volume';
 
-info.nTrials    = 2000;
-info.SNRvals    = [Inf, 30, 20];
+info.nTrials    = 1000;
+info.SNRvals    = [Inf, 40, 30, 20, 10, 0];
 
 info.ProtocolFun   = 'Protocol04';
 info.tagName       = 'testing';
@@ -51,7 +51,7 @@ delete(F)
 % database format
 originalPath = pwd;
 cd('..')
-basePath = pwd;
+info.basePath = pwd;
 cd(originalPath)
 
 %%
@@ -73,98 +73,12 @@ end
 
 %% training of model
 
-% format as database
-for idxProfile = 1:length(profiles)
-  curr_profile = profiles{idxProfile};
-  %
-  dataStoreTMP = datastore( ...
-    [ basePath,'\data\', [info.tagName, '_', curr_profile]],...
-    "IncludeSubfolders",true, ...
-    "Type","file", "ReadFcn", @customRead );
-  %
-  Q = cell(0);
-  counter = 1;
-  for ff = 1:length(dataStoreTMP.Files)
-    currFile = dataStoreTMP.Files{ff};
-    if ( ~contains(currFile,'metadata') ) && ...
-        ( ~contains(currFile,'metadata2') ) && ...
-        ( ~contains(currFile,'checklist') ) && ...
-        ( ~contains(currFile,'evaluation') ) && ...
-      ( ~contains(currFile,'params') )
-      Q{counter,1} = currFile;
-      counter = counter+1;
-    end
-  end
-  dataStoreTMP.Files = Q;
-  %
-  if idxProfile == 1
-    dataStore = dataStoreTMP;
-  else
-    %dataStore = combine(dataStore, dataStoreTMP, "ReadOrder","sequential");
-    dataStore.Files = [dataStore.Files; Q];
-  end
-end
+% opions
+info.TrainProfiles = "circ"; % "circ"  "gauss" "all"
+info.NetInput = "Both"; % "SLap", "Both"
+info.LossFun  = "l2loss"; % also 
 
-% split into train and test data
-propTrain = 0.75;
-propTest  = 0.15;
-propValid = 1 -propTrain -propTest;
-%
-rng(0);
-nTrials = numel(dataStore.Files);
-shuffleIdx = randperm(nTrials);
-%
-idxTrain  = sort(shuffleIdx(1:ceil(propTrain*nTrials)));
-idxTest   = sort(shuffleIdx(ceil((1-propTest)*nTrials):nTrials));
-idxValid  = setdiff((1:nTrials), union(idxTest,idxTrain));
-if isempty(idxValid)
-  idx = randi(length(idxTrain));
-  idxValid = idxTrain(idx);
-  idxTrain(idx) = [];
-end
-%
-fileTrain = dataStore.Files(idxTrain);
-fileTest  = dataStore.Files(idxTest);
-fileValid = dataStore.Files(idxValid);
-%
-dTrain_J  = datastore( dataStore.Files(idxTrain),...
-    "Type","file", "ReadFcn", @customRead_J );
-dTrain_SL = datastore( dataStore.Files(idxTrain),...
-    "Type","file", "ReadFcn", @customRead_SL );
-dTest_J  = datastore( dataStore.Files(idxTest),...
-    "Type","file", "ReadFcn", @customRead_J );
-dTest_SL = datastore( dataStore.Files(idxTest),...
-    "Type","file", "ReadFcn", @customRead_SL );
-%
-trainData  = combine(dTrain_SL,dTrain_J);
-testData   = combine(dTest_SL, dTest_J );
-
-% read one file to get the appropriate dimensions
-tmpJ  = preview(dTrain_J);
-tmpSL = preview(dTrain_SL);
-
-% layers
-layers = [...
-  inputLayer([size(tmpSL) 1], "CTB") ...
-  fullyConnectedLayer(500) ...
-  fullyConnectedLayer(500) ...
-  fullyConnectedLayer(size(tmpJ,1)) ...
-  ];
-
-% options
-opts = trainingOptions(...
-  "sgdm",... % Stoch Grad Descent w/ Momentum
-  Plots = "training-progress", ...
-  MaxEpochs = 100, ...
-  Shuffle = "every-epoch", ...
-  OutputNetwork = "best-validation", ...
-  ValidationData = testData ...
-  );
-
-% network training
-SLnetTrained = trainnet(trainData,layers,"l1loss",opts);
-%netTrained = trainnet(trainData,layers,"l2loss",opts);
-summary(SLnetTrained)
+trainSLapNN(info)
 
 %% evaluation
 %for idxProfile = 1:length(profiles)
