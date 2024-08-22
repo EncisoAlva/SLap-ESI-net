@@ -78,6 +78,9 @@ end
 info.TrainProfiles = "all"; % "circ"  "gauss" "all"
 info.NetInput = "SLap_WMNE"; % "SLap", "EEG", "EEG_SLap" "SLap_WMNE"
 info.LossFun  = "l2loss"; % also 
+%
+info.propTrain = 0.75;
+info.propTest  = 0.2;
 
 trainSLapNN(info)
 

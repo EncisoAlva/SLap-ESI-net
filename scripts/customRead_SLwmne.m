@@ -10,7 +10,7 @@ load(caseFile,'result');
 %SL = result.data.SL;
 %SY = result.data.SY;
 
-SLW = [SL, full(result.data.J_WMNE)];
+SLW = [ result.data.SL; full(result.data.J_WMNE)];
 
 end
 
