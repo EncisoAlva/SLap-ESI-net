@@ -15,15 +15,15 @@ info.OGelec     = 'icbm152_10_10_elec';
 
 info.SourceType = 'volume';
 
-info.nTrials    = 1000;
-info.SNRvals    = [Inf, 30, 20, 10];
+info.nTrials    = 100;
+info.SNRvals    = [Inf, 40, 30, 20, 10, 0];
 
 info.ProtocolFun   = 'Protocol04';
-info.tagName       = 'evaluation01';
+info.tagName       = 'testing';
 
 info.maxDepth  = Inf; % unit: mm
-info.maxKappa  = 10*sqrt( 5/pi); % unit: mm
-info.minKappa  = 10*sqrt(15/pi); % unit: mm
+info.maxKappa  = 10*sqrt(10/pi); % unit: mm
+info.minKappa  = 10*sqrt(10/pi); % unit: mm
 
 % for vol:  kap = 30.9 mm  ->  A = 30 cm^2
 % for srf:  kap = 30.9 mm  ->  A = 30 cm^2
@@ -39,8 +39,7 @@ info.nLapGrid = 9;
 
 %% 
 % Preprocessing for Spline Laplacian
-% only run one time
-%pre_laplace(info);
+pre_laplace(info);
 
 %% CLOSE BROKEN WAITBARS
 F = findall(0,'type','figure','tag','TMWWaitbar');
@@ -62,21 +61,45 @@ cd(originalPath)
 %      gauss  ||J_n|| = exp( - dist(n, n*)^2 / 2*k^2 )
 %       circ  ||J_n|| = sqrt( 1 - [ dist(n, n*) / k ]^2 )
 
+%profiles = {'square', 'gauss', 'exp', 'circ'};
 profiles = {'square', 'gauss', 'exp', 'circ'};
-for idxProfile = 1:length(profiles)
-  curr_profile = profiles{idxProfile};
-  info.BaseName      = [info.tagName, '_', curr_profile];
-  info.SourceProfile = curr_profile;
-  %
-  % only run one time
-  %generator(info);
-end
 
 for idxProfile = 1:length(profiles)
   curr_profile = profiles{idxProfile};
   info.BaseName      = [info.tagName, '_', curr_profile];
   info.SourceProfile = curr_profile;
   %
-  evaluator(info);
-  collector(info);
+  generator2(info);
 end
+
+%% training of model
+
+% opions
+%info.TrainProfiles = "circ"; % "circ"  "gauss" "all"
+%info.NetInput = "SLap_WMNE"; % "SLap", "EEG", "EEG_SLap" "SLap_WMNE"
+info.LossFun  = "l2loss"; % also 
+%
+info.propTrain = 0.8;
+info.propTest  = 0.2;
+
+profiles2 = {'all', 'square', 'gauss', 'exp', 'circ'};
+inputss   = {"SLap", "EEG", "WMNE", "EEG_SLap", "SLap_WMNE", "EEG_WMNE", "EEG_SLap_WMNE"};
+for ii = 1:5
+  info.TrainProfiles = profiles2{ii};
+  for jj = 1:6
+    info.NetInput = inputss{jj};
+    %
+    trainSLapNN(info)
+  end
+end
+
+%% evaluation
+%for idxProfile = 1:length(profiles)
+%  curr_profile = profiles{idxProfile};
+%  info.BaseName      = [info.tagName, '_', curr_profile];
+%  info.SourceProfile = curr_profile;
+%  %
+%  %generator(info);
+%  evaluator(info);
+%  collector(info);
+%end
