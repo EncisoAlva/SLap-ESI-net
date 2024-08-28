@@ -1,4 +1,4 @@
-function metric = RMSE( meta, info, result, solution )
+function metric = RMSE_norm( meta, info, result, solution )
 % Relative Mean Square Error
 %    || J^ - J ||_2 / || J ||_2
 
@@ -21,6 +21,12 @@ switch info.SourceType
     refJ = zeros( meta.nGridDips*3, 1 );
     refJ( result.data.idxShortG ) = result.data.Jshort;
 end
+
+% normalization
+Jmax = max(abs(estJ(:)));
+estJ = estJ / Jmax;
+Jmax = max(abs(refJ(:)));
+refJ = refJ / Jmax;
 
 %
 relRMSE = norm( estJ - refJ, 2)  / norm( refJ, 2 );

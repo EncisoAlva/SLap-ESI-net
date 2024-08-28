@@ -15,7 +15,7 @@ info.OGelec     = 'icbm152_10_10_elec';
 
 info.SourceType = 'volume';
 
-info.nTrials    = 100;
+info.nTrials    = 200;
 info.SNRvals    = [Inf, 30, 20, 10];
 
 info.ProtocolFun   = 'Protocol04';

@@ -8,6 +8,11 @@ function metric = funMSE( meta, info, result, solution )
 
 % ground truth
 estJ = solution.J(:,pkIDX);
+if size(estJ,2) ~= 1
+  estJ = estJ';
+end
+
+% estimated
 switch info.SourceType
   case 'surface'
     refJ = zeros( meta.nGridDips, 1 );
@@ -16,6 +21,7 @@ switch info.SourceType
     refJ = zeros( meta.nGridDips*3, 1 );
     refJ( result.data.idxShortG ) = result.data.Jshort;
 end
+
 %
 funMSE = norm( meta.Leadfield*(estJ - refJ), 2)  / norm( meta.Leadfield*refJ, 2 );
 

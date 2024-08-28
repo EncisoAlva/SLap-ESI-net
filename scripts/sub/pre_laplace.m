@@ -78,7 +78,7 @@ end
 
 % new points on a 'good' mesh
 NN = info.nLapGrid;
-[X,Y,Z] = sphere(NN-1);
+[Z,Y,X] = sphere(NN-1);
 icos = zeros(NN*NN,3);
 icos(:,1) = X(:);
 icos(:,2) = Y(:);

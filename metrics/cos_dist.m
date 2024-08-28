@@ -1,4 +1,4 @@
-function metric = RMSE( meta, info, result, solution )
+function metric = cos_dist( meta, info, result, solution )
 % Relative Mean Square Error
 %    || J^ - J ||_2 / || J ||_2
 
@@ -22,10 +22,20 @@ switch info.SourceType
     refJ( result.data.idxShortG ) = result.data.Jshort;
 end
 
+% normalization
+Jmax = max(abs(estJ(:)));
+estJ = estJ / Jmax;
+Jmax = max(abs(refJ(:)));
+refJ = refJ / Jmax;
+
 %
-relRMSE = norm( estJ - refJ, 2)  / norm( refJ, 2 );
+if size(estJ,2) == 1
+  cos = 1 - estJ' * refJ;
+else
+  cos = 1 - estJ * refJ';
+end
 
 % Distance Localisation Error for one single point
-metric = relRMSE;
+metric = cos;
 
 end

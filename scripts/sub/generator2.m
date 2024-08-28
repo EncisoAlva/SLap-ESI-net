@@ -247,7 +247,7 @@ for SNRi = info.SNRvals
       [~,result.idxCent] = min(vecnorm( meta.Gridloc - info.debugCoord, 2, 2));
     else
       % select source randomly
-      rng(idxRand)
+      rng(idxRand+240527) % radom seed is my 30th birthday + index
       found_source = false;
       while ~found_source
         tmp = randi([1 meta.nGridDips]);
