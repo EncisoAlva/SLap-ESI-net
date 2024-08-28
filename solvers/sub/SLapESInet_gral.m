@@ -11,8 +11,8 @@ switch opts.NetInput
   case {"WMNE", "EEG_WMNE", "SLap_WMNE", "EEG_SLap_WMNE"}
     % compute WMNE solution
     J_WMNE = pars.kernel * (result.data.Y) ./(meta.ColumnNorm');
-    maxJ = max(abs(JJ_WMNE(:)));
-    J_WMNE(abs(J)<0.1*maxJ) = 0;
+    maxJ = max(abs(J_WMNE(:)));
+    J_WMNE(abs(J_WMNE)<0.1*maxJ) = 0;
     %J_WMNE = sparse(J);
   otherwise
     % do nothing

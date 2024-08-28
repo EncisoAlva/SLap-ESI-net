@@ -15,11 +15,11 @@ info.OGelec     = 'icbm152_10_10_elec';
 
 info.SourceType = 'volume';
 
-info.nTrials    = 1000;
+info.nTrials    = 100;
 info.SNRvals    = [Inf, 30, 20, 10];
 
 info.ProtocolFun   = 'Protocol04';
-info.tagName       = 'evaluation01';
+info.tagName       = 'evaluation02';
 
 info.maxDepth  = Inf; % unit: mm
 info.maxKappa  = 10*sqrt( 5/pi); % unit: mm
@@ -40,7 +40,7 @@ info.nLapGrid = 9;
 %% 
 % Preprocessing for Spline Laplacian
 % only run one time
-%pre_laplace(info);
+pre_laplace(info);
 
 %% CLOSE BROKEN WAITBARS
 F = findall(0,'type','figure','tag','TMWWaitbar');
@@ -69,7 +69,7 @@ for idxProfile = 1:length(profiles)
   info.SourceProfile = curr_profile;
   %
   % only run one time
-  %generator(info);
+  generator(info);
 end
 
 for idxProfile = 1:length(profiles)

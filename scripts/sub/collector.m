@@ -13,7 +13,6 @@ function collector(info)
 %
 
 BaseName   = info.BaseName;
-hard_reset = false;
 
 %% SETUP
 originalPath = pwd;
@@ -25,8 +24,8 @@ basePath  = pwd;
 cd(['./data/', BaseName])
 dataPath = pwd;
 
-load("metadata.mat")
-load("metadata2.mat")
+load("metadata.mat",'meta')
+load("metadata2.mat",'info')
 
 nCases      = info.nTrials;
 nConditions = length(info.SNRvals);
