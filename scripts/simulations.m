@@ -19,7 +19,7 @@ info.nTrials    = 200;
 info.SNRvals    = [Inf, 30, 20, 10];
 
 info.ProtocolFun   = 'Protocol04';
-info.tagName       = 'evaluation02';
+info.tagName       = 'evaluation2408';
 
 info.maxDepth  = Inf; % unit: mm
 info.maxKappa  = 10*sqrt( 5/pi); % unit: mm
@@ -35,7 +35,7 @@ info.debugCoord = [47.353, 18.555, 113.019];
 
 info.print_all = false;
 
-info.nLapGrid = 9;
+info.nLapGrid = 10;
 
 %% 
 % Preprocessing for Spline Laplacian

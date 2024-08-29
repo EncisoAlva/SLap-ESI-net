@@ -12,7 +12,8 @@ load(strcat(info.basePath,'\anat_ref\', ...
 pars.lap = lap;
 
 load(strcat(info.basePath,'\networks\', ...
-  'net_testing_','all_', opts.NetInput,".mat"), "netTrained");
+  'net_NetData240827_', ...
+  'all_', opts.NetInput,".mat"), "netTrained");
 pars.network = netTrained;
 
 % find regularization for WMNE using U-curve
