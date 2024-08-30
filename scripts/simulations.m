@@ -69,7 +69,7 @@ for idxProfile = 1:length(profiles)
   info.SourceProfile = curr_profile;
   %
   % only run one time
-  generator(info);
+  %generator(info);
 end
 
 for idxProfile = 1:length(profiles)
