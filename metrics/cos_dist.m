@@ -30,9 +30,9 @@ refJ = refJ / Jmax;
 
 %
 if size(estJ,2) == 1
-  cos = 1 - estJ' * refJ;
+  cos = 1 - estJ' * refJ / (norm(estJ,'fro')*norm(refJ,'fro'));
 else
-  cos = 1 - estJ * refJ';
+  cos = 1 - estJ * refJ' / (norm(estJ,'fro')*norm(refJ,'fro'));
 end
 
 % Distance Localisation Error for one single point

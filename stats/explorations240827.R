@@ -2,8 +2,7 @@ library("ggpubr")
 library("readxl")
 
 # dataset to analyze
-#tagname = 'EvalMetrics_Protocol04_30'
-tagname = 'EvalMetrics_protocol04_vol5k_pig'
+tagname = 'EvalMetrics_evaluation01'
 
 # current directory
 script_dir = getwd()
@@ -36,7 +35,7 @@ title_text = "Polynomial profile"
 
 # format (hard-coded for now)
 table$SNR = factor(table$SNR, 
-                   levels = c( "Inf", "30", "20", "10", "0" ) 
+                   levels = c( "Inf", "30", "20", "10") 
 )
 table$HalfMax = table$HalfMax/1000
 
@@ -146,7 +145,7 @@ p
 # Area Under ROC
 p <- ggviolin(table[ table$SNR %in% c("Inf","30","20","10"), ], 
               x = "SNR",
-              y = "AUROC_loc_w",
+              y = "AUROC_loc_classic",
               fill = "Solver",
               add = "mean_sd") +
   ylab("AUROC (local)") +

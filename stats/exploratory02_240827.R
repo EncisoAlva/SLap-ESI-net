@@ -413,6 +413,80 @@ ggarrange( G1, G2, G3, G4,
 ggsave( paste0("SNRdegradation_",tagname, ".pdf"),
         width = 9, height = 6, units = "in")
 
+################################################################################
+
+currMethod = "EEG"
+currMethod = "wMNE*"
+
+G1 = table %>%
+  na.omit() %>%
+  filter( Solver == currMethod ) %>%
+  filter( SNR == "30" ) %>%
+  ggscatter(., x="Depth", y="DLE1" 
+         #group=interaction("Profile", "idx"), 
+         #color = "Solver",
+         #shape = "Solver",
+         #add="mean", error.plot = "pointrange"
+         )+
+  xlab("Depth [mm]") +
+  ylab("Distance Localisation Error [mm]") +
+  grids() +
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust=1))
+
+G2 = table %>%
+  na.omit() %>%
+  filter( Solver == currMethod ) %>%
+  filter( SNR == "30" ) %>%
+  ggscatter(., x="Depth", y="SpaDis2" 
+            #group=interaction("Profile", "idx"), 
+            #color = "Solver",
+            #shape = "Solver",
+            #add="mean", error.plot = "pointrange"
+  )+
+  xlab("Depth [mm]") +
+  ylab("Spatial Dispersion [mm]") +
+  grids() +
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust=1))
+
+G3 = table %>%
+  na.omit() %>%
+  filter( Solver == currMethod ) %>%
+  filter( SNR == "30" ) %>%
+  ggscatter(., x="Depth", y="AUROC_loc_classic" 
+            #group=interaction("Profile", "idx"), 
+            #color = "Solver",
+            #shape = "Solver",
+            #add="mean", error.plot = "pointrange"
+  )+
+  xlab("Depth [mm]") +
+  ylab("AUROC") +
+  grids() +
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust=1))
+
+G4 = table %>%
+  na.omit() %>%
+  filter( Solver == currMethod ) %>%
+  filter( SNR == "30" ) %>%
+  ggscatter(., x="Depth", y="AP_loc_classic" 
+            #group=interaction("Profile", "idx"), 
+            #color = "Solver",
+            #shape = "Solver",
+            #add="mean", error.plot = "pointrange"
+  )+
+  xlab("Depth [mm]") +
+  ylab("Average Precision") +
+  grids() +
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, hjust=1))
+
+ggarrange( G1, G2, G3, G4,
+           ncol = 2, nrow = 2, align = "v", common.legend = TRUE, legend="top")
+ggsave( paste0("CORR_depth_", currMethod, "_",tagname, ".pdf"),
+        width = 9, height = 6, units = "in")
+
 
 ################################################################################
 
