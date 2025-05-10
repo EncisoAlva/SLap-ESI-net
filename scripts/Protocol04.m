@@ -3,12 +3,12 @@
 %  > Constrained dipoles at brain cortex
 %  > One single active dipole (given)
 %  > Sample freq = 15 Hz [actually irrelevant]
-%  > Sample window = 1 sec, from 0 to 1
-%  > Total points: 15
-%  > Signal: Sine wave with peak at t = 0.5 s
+%  > Sample window = 1/15 sec, ie one single timepoint
+%  > Total points: 1
+%  > Signal: [Deprecated for the moment]
 %  > Added noise on sensors with prescribed SNR (given)
 %
-% Author: Julio C Enciso-Alva (2023)
+% Author: Julio C Enciso-Alva (2025)
 %         juliocesar.encisoalva@mavs.uta.edu
 %
 function RES = Protocol04( meta, result, info )
