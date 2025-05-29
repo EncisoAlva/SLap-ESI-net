@@ -17,7 +17,7 @@ info.SourceType = 'volume';
 info.nTrials    = 5;
 info.SNRvals    = 30;
 
-info.ProtocolFun   = 'Protocol04';
+info.ProtocolFun   = 'Protocol05';
 info.tagName       = 'testing';
 
 info.maxDepth  = Inf; % unit: mm

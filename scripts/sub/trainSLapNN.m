@@ -2,18 +2,16 @@ function trainSLapNN(info)
 % Create neural nwtwrok for the Electrical Source Imaging problem, trained
 % from synthetic data
 
-profiles = {'square', 'gauss', 'exp', 'circ'};
-
 % format as database
 switch info.TrainProfiles
   case "all"
-    profiles_ = profiles;
+    profiles = {'square', 'gauss', 'exp', 'circ'};
   otherwise
-    profiles_ = {info.TrainProfiles};
+    profiles = {info.TrainProfiles};
 end
 
-for idxProfile = 1:length(profiles_)
-  curr_profile = profiles_{idxProfile};
+for idxProfile = 1:length(profiles)
+  curr_profile = profiles{idxProfile};
   %
   dataStoreTMP = datastore( ...
     strcat( info.basePath,'\data\', info.tagName, '_', curr_profile),...
@@ -24,6 +22,7 @@ for idxProfile = 1:length(profiles_)
   counter = 1;
   for ff = 1:length(dataStoreTMP.Files)
     currFile = dataStoreTMP.Files{ff};
+    % skip metadata files
     if ( ~contains(currFile,'metadata') ) && ...
         ( ~contains(currFile,'metadata2') ) && ...
         ( ~contains(currFile,'checklist') ) && ...
