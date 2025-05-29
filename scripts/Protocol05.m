@@ -56,16 +56,15 @@ switch info.SourceProfile
   case 'circ'
     normJshort = ( 1 - min( Distance /result.kappa,1 ).^2 ).^(1/2);
 end
-% patch
-if size(RES.Jshort, 2) ~= 1
-  RES.Jshort = RES.Jshort';
-end
+normJshort( normJshort > max(abs( normJshort ))*0.05 ) = 0; % sparse enforce
+normJshort = normJshort / sqrt(sum( normJshort.^2 ));
+
 % add chosen orientation if it is a volume source
 switch info.SourceType
   case 'volume'
-    RES.Jshort = kron(normJshort, result.Orient');
+    Jshort = kron(normJshort, result.Orient');
   case 'surface'
-    % nothing
+    Jshort = normJshort;
 end
 
 % inflate and make sparse (for storage)
@@ -74,7 +73,7 @@ normJ(idxShort) = normJshort;
 RES.normJsparse = sparse(normJ);
 
 J = zeros(size(idxShortG,1),1);
-J(idxShort) = RES.Jshort;
+J(idxShort) = Jshort;
 RES.Jsparse = sparse(J);
 
 % Y, noiseless
@@ -131,10 +130,10 @@ set(gca,'XColor', 'none','YColor','none','ZColor','none')
 set(gca, 'color', 'none');
 set(gcf,'color','w');
 set(gca,'LooseInset',get(gca,'TightInset'))
-fig = gcf;
-fig.Units = 'inches';
-fig.OuterPosition = [0 0 3 3];
-exportgraphics(gcf,[info.SourceProfile, '_center.pdf'],'Resolution',600)
+%fig = gcf;
+%fig.Units = 'inches';
+%fig.OuterPosition = [0 0 3 3];
+%exportgraphics(gcf,[info.SourceProfile, '_center.pdf'],'Resolution',600)
 
 end
 

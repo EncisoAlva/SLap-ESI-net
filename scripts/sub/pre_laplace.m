@@ -51,7 +51,7 @@ err_old = mean(abs( vecnorm(lap.OGpos-ctr_old, 2, 2)-rad_old ));
 
 % loop for getting a better center
 for scale = -10:10
-  fprintf('Step %i / 10\n \n', scale)
+  %fprintf('Step %i / 10\n \n', scale)
   for idx = 1:10000
     ctr_new = ctr_old + normrnd(0,rad_old*2^(-scale), 1,3);
     rad_new = median( vecnorm(lap.OGpos-ctr_new, 2, 2) );
@@ -79,6 +79,7 @@ end
 % new points on a 'good' mesh
 NN = info.nLapGrid;
 [Z,Y,X] = sphere(NN-1);
+sphere_surf = surf2patch(X,Y,Z,'triangles');
 icos = zeros(NN*NN,3);
 icos(:,1) = X(:);
 icos(:,2) = Y(:);
@@ -99,6 +100,13 @@ dr2 = min(sqdist,[],1);
 lap.MESHpos0 = icos(dr2<avg_dist,:);
 lap.MESHpos  = lap.SPHcenter + lap.MESHpos0;
 lap.nMesh    = size(lap.MESHpos0,1);
+%
+idx = 1:size(icos,1);
+idx_keep = idx(dr2<avg_dist);
+idx_new  = zeros(1,size(icos,1));
+idx_new(idx_keep) = 1:size(idx_keep,2);
+Triangulation0 = sphere_surf.faces( all(ismember(sphere_surf.faces, idx_keep),2), :);
+lap.Triangulation  = idx_new(Triangulation0);
 
 if info.debugFigs
   figure()
@@ -112,6 +120,35 @@ if info.debugFigs
   legend({'Electrode Positions (original)', ...
           'Electrode Positions (projected)', 'Spherical Grid'}, ...
           "Location","south")
+end
+
+if info.debugFigs
+figure()
+trisurf(lap.Triangulation, ...
+  lap.MESHpos(:,1), lap.MESHpos(:,2), lap.MESHpos(:,3), ...
+  'FaceColor', [1,1,1]*153/255, ...
+  'EdgeColor', ...
+  'none', 'FaceAlpha', 0.75 )
+
+% change view BEFORE adding light
+view([ 90  90]) % top
+camlight('headlight','infinite')
+material dull
+grid off
+set(gca,'DataAspectRatio',[1 1 1])
+
+hold on
+scatter3(lap.OGpos(:,1), lap.OGpos(:,2), lap.OGpos(:,3), "filled")
+scatter3(lap.SPHpos(:,1), lap.SPHpos(:,2), lap.SPHpos(:,3), "filled")
+
+xlabel('1: Anterior->Posterior [mm]')
+ylabel('2: Right->Left [mm]')
+zlabel('3: Inferior->Superior [mm]')
+legend({'Spherical Grid', 'Electrode Positions (original)', ...
+        'Electrode Positions (projected)'}, ...
+        "Location","south")
+end
+
 end
 
 %% 2. SPLINE LAPLACIAN

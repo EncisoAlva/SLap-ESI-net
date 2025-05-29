@@ -15,7 +15,7 @@ info.OGelec     = 'icbm152_10_10_elec';
 info.SourceType = 'surface';
 
 info.nTrials    = 2;
-info.SNRvals    = [Inf];
+info.SNRvals    = [Inf, 30];
 
 info.ProtocolFun   = 'Protocol05';
 info.tagName       = 'test_deletable';
@@ -34,7 +34,11 @@ info.debugCoord = [47.353, 18.555, 113.019];
 
 info.print_all = false;
 
-info.nLapGrid = 10;
+info.nLapGrid = 20;
+
+%%
+% add auxiliary functions
+addpath( [pwd,'\sub'] )
 
 %% 
 % Preprocessing for Spline Laplacian
