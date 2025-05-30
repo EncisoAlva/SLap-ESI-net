@@ -149,8 +149,6 @@ legend({'Spherical Grid', 'Electrode Positions (original)', ...
         "Location","south")
 end
 
-end
-
 %% 2. SPLINE LAPLACIAN
 
 % constructions of splines from electrode pos, regularized via GCV
@@ -196,5 +194,34 @@ cd(scriptsPath)
 clc
 
 delete(f)
+
+end
+
+function debugPlotLaplacian(lap)
+
+figure()
+trisurf(lap.Triangulation, ...
+  lap.MESHpos(:,1), lap.MESHpos(:,2), lap.MESHpos(:,3), ...
+  'FaceColor', [1,1,1]*153/255, ...
+  'EdgeColor', ...
+  'none', 'FaceAlpha', 0.75 )
+
+% change view BEFORE adding light
+view([ 90  90]) % top
+camlight('headlight','infinite')
+material dull
+grid off
+set(gca,'DataAspectRatio',[1 1 1])
+
+hold on
+scatter3(lap.OGpos(:,1), lap.OGpos(:,2), lap.OGpos(:,3), "filled")
+scatter3(lap.SPHpos(:,1), lap.SPHpos(:,2), lap.SPHpos(:,3), "filled")
+
+xlabel('1: Anterior->Posterior [mm]')
+ylabel('2: Right->Left [mm]')
+zlabel('3: Inferior->Superior [mm]')
+legend({'Spherical Grid', 'Electrode Positions (original)', ...
+        'Electrode Positions (projected)'}, ...
+        "Location","south")
 
 end

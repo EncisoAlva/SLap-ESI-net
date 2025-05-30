@@ -20,7 +20,7 @@ info.SNRvals    = [Inf, 30];
 info.ProtocolFun   = 'Protocol05';
 info.tagName       = 'test_deletable';
 
-info.maxDepth  = 2; % unit: mm
+info.maxDepth  = 25; % unit: mm
 info.maxKappa  = 10*sqrt( 5/pi); % unit: mm
 info.minKappa  = 10*sqrt(20/pi); % unit: mm
 
@@ -34,19 +34,7 @@ info.debugCoord = [47.353, 18.555, 113.019];
 
 info.print_all = false;
 
-info.nLapGrid = 20;
-
-%%
-% add auxiliary functions
-addpath( [pwd,'\sub'] )
-
-%% 
-% Preprocessing for Spline Laplacian
-pre_laplace(info);
-
-%% CLOSE BROKEN WAITBARS
-F = findall(0,'type','figure','tag','TMWWaitbar');
-delete(F)
+info.nLapGrid = 25;
 
 %%
 % variables (may be moved to a function in the future)
@@ -56,6 +44,18 @@ originalPath = pwd;
 cd('..')
 info.basePath = pwd;
 cd(originalPath)
+
+% add auxiliary functions
+addpath(pwd, [pwd,'\sub'] )
+
+% CLOSE BROKEN WAITBARS
+F = findall(0,'type','figure','tag','TMWWaitbar');
+delete(F)
+
+%% 
+% Preprocessing for Spline Laplacian
+pre_laplace(info);
+
 
 %%
 % Source patch has different profiles:

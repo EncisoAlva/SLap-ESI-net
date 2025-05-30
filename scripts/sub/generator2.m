@@ -252,7 +252,7 @@ for SNRi = info.SNRvals
       while ~found_source
         tmp = randi([1 meta.nGridDips]);
         if info.debugFigs
-          disp(tmp)
+          %disp(tmp)
         end
         if meta.GridDepth(tmp) < info.maxDepth
           found_source = true;

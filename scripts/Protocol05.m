@@ -56,29 +56,31 @@ switch info.SourceProfile
   case 'circ'
     normJshort = ( 1 - min( Distance /result.kappa,1 ).^2 ).^(1/2);
 end
-normJshort( normJshort > max(abs( normJshort ))*0.05 ) = 0; % sparse enforce
+normJshort( normJshort < max(abs( normJshort ))*0.05 ) = 0; % sparse enforce
 normJshort = normJshort / sqrt(sum( normJshort.^2 ));
-
-% add chosen orientation if it is a volume source
-switch info.SourceType
-  case 'volume'
-    Jshort = kron(normJshort, result.Orient');
-  case 'surface'
-    Jshort = normJshort;
-end
 
 % inflate and make sparse (for storage)
 normJ = zeros(meta.nGridDips,1);
 normJ(idxShort) = normJshort;
 RES.normJsparse = sparse(normJ);
 
-J = zeros(size(idxShortG,1),1);
-J(idxShort) = Jshort;
+% add chosen orientation if it is a volume source
+switch info.SourceType
+  case 'volume'
+    J = zeros(meta.nGridDips*3,1);
+    tmp = (idxShort-1)*3 + [1,2,3]';
+    J(sort(tmp(:))) = kron(normJshort, result.Orient');
+  case 'surface'
+    J = zeros(meta.nGridDips  ,1);
+    J(idxShort) = normJshort;
+end
 RES.Jsparse = sparse(J);
 
 % Y, noiseless
 RES.Yclean = meta.Leadfield * J;
 RES.varY   = RES.Yclean.^2;
+
+
 
 % adding noise to a prescribed SNR
 if isinf(result.SNR)
