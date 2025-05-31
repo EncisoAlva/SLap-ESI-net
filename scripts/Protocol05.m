@@ -43,6 +43,8 @@ switch info.SourceType
     Distance = GraphDist;
 end
 
+%fprintf('Distance is ok')
+
 % J, shortened to non-zero dipoles
 RES.time       = linspace(0,0,1);
 normJshort = zeros(nShort,1);
@@ -64,6 +66,8 @@ normJ = zeros(meta.nGridDips,1);
 normJ(idxShort) = normJshort;
 RES.normJsparse = sparse(normJ);
 
+%fprintf('normJsparse is ok')
+
 % add chosen orientation if it is a volume source
 switch info.SourceType
   case 'volume'
@@ -76,11 +80,13 @@ switch info.SourceType
 end
 RES.Jsparse = sparse(J);
 
+%fprintf('Jsparse is ok')
+
 % Y, noiseless
 RES.Yclean = meta.Leadfield * J;
 RES.varY   = RES.Yclean.^2;
 
-
+%fprintf('Yclean is ok')
 
 % adding noise to a prescribed SNR
 if isinf(result.SNR)
@@ -94,7 +100,7 @@ RES.YOG = RES.Yclean + 10^(-result.SNR/10) * diag( RES.varY ) * noise;
 RES.Y   = RES.YOG - mean(RES.YOG,1); % average re-referencing
 
 % true center of mass
-RES.TrueCent = normJshort' * meta.Gridloc(idxShort,:) / sum(normJshort);
+RES.TrueCent = normJ' * meta.Gridloc / sum(normJ);
 
 end
 

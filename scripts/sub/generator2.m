@@ -275,7 +275,9 @@ for SNRi = info.SNRvals
       result.kappa = info.minKappa + rand(1,1)*(info.maxKappa-info.minKappa);
     end
     %
+    %fprintf('before generating data')
     result.data = feval(info.ProtocolFun, meta, result, info);
+    %fprintf('data generation is ok')
     result.data.SY = lap.S*result.data.Y;
     result.data.SL = lap.L*result.data.Y;
     %

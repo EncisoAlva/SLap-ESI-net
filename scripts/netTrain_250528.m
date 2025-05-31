@@ -65,7 +65,7 @@ pre_laplace(info);
 %       circ  ||J_n|| = sqrt( 1 - [ dist(n, n*) / k ]^2 )
 
 %profiles = {'square', 'gauss', 'exp', 'circ'};
-profiles = {'square', 'gauss', 'exp', 'circ'};
+profiles = {'gauss'};
 
 for idxProfile = 1:length(profiles)
   curr_profile = profiles{idxProfile};

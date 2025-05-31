@@ -60,7 +60,7 @@ for scale = -10:10
       ctr_old = ctr_new;
       rad_old = rad_new;
       err_old = err_new;
-      fprintf('Avg. error: %2.7f ;  Id : %i \n', err_old, idx)
+      %fprintf('Avg. error: %2.7f ;  Id : %i \n', err_old, idx)
     end
   end
 end
@@ -153,30 +153,35 @@ end
 
 % constructions of splines from electrode pos, regularized via GCV
 [K_0, LapK_0, T, Q1, Q2, R, max_n, ~] = sphlap0( lap.SPHpos0, 4, 1e-10);
-best_lambda = 1;
-scale = 1;
-GCV = zeros(21,1);
-while scale > 1e-5
-  lambdas = best_lambda * (2.^((-scale):(scale/10):scale));
-  for j = 1:length(lambdas)
-    curr_lambda = lambdas(j);
-    [S_lam, ~, ~, ~] = sphlap (K_0, LapK_0, T, Q1, Q2, R, curr_lambda);
-    V = normrnd( 0, 1/sqrt(lap.nElec), lap.nElec, lap.nElec );
-    GCV(j) = norm( (S_lam -eye(lap.nElec))*V, 'fro')^2 / ...
-      ( 1 -trace(S_lam)/lap.nElec )^2 ;
-  end
-  %disp(GCV'-mean(GCV))
-  [G, idx] = min(GCV);
-  best_lambda = lambdas(idx);
-  fprintf("Best lambda : %2.4d   ;   avgGCV(*) : %2.3d \n", ...
-    best_lambda, (G-mean(GCV))/max(abs(GCV-mean(GCV))) )
-  if ( idx==1 )||( idx==length(lambdas) )
-    scale = scale*10;
-  else
-    scale = scale/10;
-  end
-end
-[~, ~, C, D] = sphlap (K_0, LapK_0, T, Q1, Q2, R, curr_lambda);
+%best_lambda = 1;
+%scale = 20;
+%GCV = zeros(21,1);
+%while scale > 1e-5
+%  lambdas = best_lambda * (2.^((-scale):(scale/10):scale));
+%  for j = 1:length(lambdas)
+%    curr_lambda = lambdas(j);
+%    [S_lam, ~, ~, ~] = sphlap (K_0, LapK_0, T, Q1, Q2, R, curr_lambda);
+%    %V = normrnd( 0, 1/sqrt(lap.nElec), lap.nElec, lap.nElec );
+%    %GCV(j) = norm( (S_lam -eye(lap.nElec))*V, 'fro')^2 / ...
+%    %  ( 1 -trace(S_lam)/lap.nElec )^2 ;
+%    GCV(j) = norm( (S_lam -eye(lap.nElec)), 'fro')^2 / ...
+%      ( 1 -trace(S_lam)/lap.nElec )^2 ;
+%  end
+%  %disp(GCV'-mean(GCV))
+%  [G, idx] = min(GCV);
+%  best_lambda = lambdas(idx);
+%  fprintf("Best lambda : %2.4d   ;   avgGCV(*) : %2.3d \n", ...
+%    best_lambda, (G-median(GCV))/max(abs(GCV-median(GCV))) )
+%  %if ( idx==1 )||( idx==length(lambdas) )
+%  %  scale = scale*10;
+%  %else
+%  %  scale = scale/10;
+%  %end
+%end
+%
+best_lambda = median(svd(K_0));
+%
+[~, ~, C, D] = sphlap (K_0, LapK_0, T, Q1, Q2, R, best_lambda);
 
 % interpolation to grid points
 [K_F, LapK_F ] = sphlap0_interp( lap.SPHpos0, lap.MESHpos0, 4, max_n);
@@ -191,7 +196,7 @@ lap.lambda = best_lambda;
 save(['SLap_',info.OGanatomy,'_',info.OGelec],"lap", "-v7.3");
 cd(scriptsPath)
 
-clc
+%clc
 
 delete(f)
 

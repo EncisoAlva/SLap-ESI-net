@@ -79,7 +79,7 @@ for n = 1:max_n
   G  = horzcat(G, gm);
   LapG = horzcat(LapG, -n* (n+1)* gm);
   %epsilon = max(abs( G(:,end)-G0 ));
-  G0 = G(:,end);
+  %G0 = G(:,end);
 end
 
 %tol = epsilon; % final error tolerance
