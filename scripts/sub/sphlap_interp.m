@@ -29,7 +29,7 @@
 
 function [S, L] = sphlap_interp (K, LapK, C, D)
 
-S = K*C + ones(size(K,1),1)*D; % The smoother matrix 
+S = K*C + D; % The smoother matrix 
 L = LapK*C;    % The Laplacian matrix
 
 end

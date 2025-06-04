@@ -30,7 +30,7 @@
 % 2024-Aug  The input is a Nx3 matrix, instead of 3 Nx1 matrices.
 %           Modification by Enciso-Alva.
 
-function [K, KLap, T, Q1, Q2, R, max_n, tol] = sphlap0(xyz_, m, tol)
+function [mat_g, mat_gLap, T, Q1, Q2, R, max_n, tol] = sphlap0_v2(xyz_, m, tol)
 
 % Handle arguments
 if nargin < 2
@@ -88,8 +88,8 @@ max_n = n-1;
 
 tol = epsilon; % final error tolerance
 
-K    = reshape( sum(G,2), N, [])/(4*pi);
-KLap = reshape( sum(LapG,2), N, []) / (4*pi*r2); 
+mat_g    = reshape( sum(G,2), N, [])/(4*pi);
+mat_gLap = reshape( sum(LapG,2), N, []) / (4*pi*r2); 
 T = ones(N,1);
 
 % QR decomposition of T

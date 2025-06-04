@@ -35,10 +35,11 @@ if nargin ~= 7
   return;
 end
 
+N = size(K, 1);
 I = eye( size(K, 1) );
-Klamb = K + lambda*I;
+Klamb = K + N*lambda*I;
 
-C = Q2 / (Q2' * Klamb * Q2) * Q2'; 
+C = ( Q2 / (Q2' * Klamb * Q2) ) * Q2'; 
 D = R \ Q1' * (I - Klamb*C);
 
 S = K*C + T*D; % The smoother matrix 

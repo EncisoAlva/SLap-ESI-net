@@ -58,7 +58,7 @@ r  = hypot(xyz(:,3), hypot(xyz(:,1), xyz(:,2))); % head radius
 N  = size(xyz, 1);  % number of electrodes
 N0 = size(xyz0, 1); % number of mesh points
 
-sqdist = pdist2(xyz0, xyz, 'euclidean').^2;
+sqdist = pdist2(xyz, xyz0, 'euclidean').^2;
 r2  = r(1)^2; % squared head radius
 cos_gamma = 1 - sqdist/(2*r2); % angle between electrodes
 
@@ -75,7 +75,7 @@ G0   = 0;
 for n = 1:max_n
   Pn = legendre(n, cos_gamma(:));
   a  = (2*n+1) / (n*(n+1))^m;
-  gm = a * Pn(1,:)';
+  gm = a * Pn(end,:)';
   G  = horzcat(G, gm);
   LapG = horzcat(LapG, -n* (n+1)* gm);
   %epsilon = max(abs( G(:,end)-G0 ));
@@ -84,7 +84,7 @@ end
 
 %tol = epsilon; % final error tolerance
 
-K = reshape( sum(G,2), N, [])/(4*pi);
-LapK = reshape( sum(LapG,2), N, []) / (4*pi*r2); 
+K = reshape( sum(G,2), N, N0)/(4*pi);
+LapK = reshape( sum(LapG,2), N, N0) / (4*pi*r2); 
 
 end
