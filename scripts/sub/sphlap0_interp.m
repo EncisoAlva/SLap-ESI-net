@@ -68,18 +68,20 @@ if any ((cos_gamma(:) > 1) | (cos_gamma (:) < -1))
     'Are they on located on a sphere?');
 end
 
-G    = []; 
-LapG = [];
-G0   = 0;
+G    = zeros(length(cos_gamma(:)),max_n); 
+LapG = zeros(length(cos_gamma(:)),max_n);
+%G0   = 0;
 
+disp('Computing interpolation on sphere.')
 for n = 1:max_n
-  Pn = legendre(n, cos_gamma(:));
-  a  = (2*n+1) / (n*(n+1))^m;
-  gm = a * Pn(end,:)';
-  G  = horzcat(G, gm);
-  LapG = horzcat(LapG, -n* (n+1)* gm);
+  Pn = legendreP(n, cos_gamma(:));
+  a  = (2*n+1) / ((n*(n+1))^m);
+  gm = a * Pn;
+  G(:,n)    = gm;
+  LapG(:,n) = -n* (n+1)* gm;
   %epsilon = max(abs( G(:,end)-G0 ));
   %G0 = G(:,end);
+  fprintf("  Terms : %2d / %2d  \n", n, max_n)
 end
 
 %tol = epsilon; % final error tolerance

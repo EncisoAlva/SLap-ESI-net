@@ -153,33 +153,33 @@ end
 
 % constructions of splines from electrode pos, regularized via GCV
 [K_0, LapK_0, T, Q1, Q2, R, max_n, ~] = sphlap0( lap.SPHpos0, 4, 1e-10);
-%best_lambda = 1;
-%scale = 20;
-%GCV = zeros(21,1);
+best_lambda = median(svd(K_0));
+scale = 25;
 %while scale > 1e-5
-%  lambdas = best_lambda * (2.^((-scale):(scale/10):scale));
-%  for j = 1:length(lambdas)
-%    curr_lambda = lambdas(j);
-%    [S_lam, ~, ~, ~] = sphlap (K_0, LapK_0, T, Q1, Q2, R, curr_lambda);
-%    %V = normrnd( 0, 1/sqrt(lap.nElec), lap.nElec, lap.nElec );
-%    %GCV(j) = norm( (S_lam -eye(lap.nElec))*V, 'fro')^2 / ...
-%    %  ( 1 -trace(S_lam)/lap.nElec )^2 ;
-%    GCV(j) = norm( (S_lam -eye(lap.nElec)), 'fro')^2 / ...
-%      ( 1 -trace(S_lam)/lap.nElec )^2 ;
-%  end
-%  %disp(GCV'-mean(GCV))
-%  [G, idx] = min(GCV);
-%  best_lambda = lambdas(idx);
-%  fprintf("Best lambda : %2.4d   ;   avgGCV(*) : %2.3d \n", ...
-%    best_lambda, (G-median(GCV))/max(abs(GCV-median(GCV))) )
-%  %if ( idx==1 )||( idx==length(lambdas) )
-%  %  scale = scale*10;
-%  %else
-%  %  scale = scale/10;
-%  %end
+  lambdas = best_lambda * (2.^((-scale):(scale/10):scale));
+  GCV = zeros(size(lambdas));
+  for j = 1:length(lambdas)
+    curr_lambda = lambdas(j);
+    [S_lam, ~, ~, ~] = sphlap (K_0, LapK_0, T, Q1, Q2, R, curr_lambda);
+    V = normrnd( 0, 1/sqrt(lap.nElec), lap.nElec, lap.nElec );
+    GCV(j) = norm( (S_lam -eye(lap.nElec))*V, 'fro')^2 / ...
+      ( 1 -trace(S_lam)/lap.nElec )^2 ;
+    %GCV(j) = norm( (S_lam -eye(lap.nElec)), 'fro')^2 / ...
+    %  ( 1 -trace(S_lam)/lap.nElec )^2 ;
+  end
+  %disp(GCV'-mean(GCV))
+  [~, idx] = min(GCV);
+  best_lambda = lambdas(idx);
+  %fprintf("Best lambda : %2.4d   ;   avgGCV(*) : %2.3d \n", ...
+  %  best_lambda, (G-median(GCV))/max(abs(GCV-median(GCV))) )
+  %if ( idx==1 )||( idx==length(lambdas) )
+  %  scale = scale*10;
+  %else
+  %  scale = scale/10;
+  %end
 %end
 %
-best_lambda = median(svd(K_0));
+%best_lambda = median(svd(K_0));
 %
 [~, ~, C, D] = sphlap (K_0, LapK_0, T, Q1, Q2, R, best_lambda);
 

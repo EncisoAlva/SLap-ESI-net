@@ -19,18 +19,20 @@ set(gcf,'color','w');
 set(gca,'LooseInset',get(gca,'TightInset'))
 
 hold on
+MM = max(abs(CurrVar(:)));
 trisurf(lap.Triangulation, ...
   lap.MESHpos(:,1), lap.MESHpos(:,2), lap.MESHpos(:,3), ...
   'FaceColor', 'interp', ...
   'FaceVertexCData', CurrVar, ...
   'EdgeColor', 'none', ...
   'FaceAlpha', 'interp', ...
-  'FaceVertexAlphaData', CurrVar )
+  'FaceVertexAlphaData', ones(size(CurrVar)) )
   %'FaceVertexAlphaData', 1*(abs(CurrVar)>0.05*max(abs(CurrVar(:)))) )
 material dull
 %colormap("turbo")
 colormap("parula")
-clim([min(CurrVar(:)),max(CurrVar(:))])
+%clim([min(CurrVar(:)),max(CurrVar(:))])
+clim([-MM,MM])
 
 colorbar
 

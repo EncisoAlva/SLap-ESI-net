@@ -72,17 +72,19 @@ LapG = [];
 G0   = 0;
 epsilon = tol + 1;
 
+disp('Computing interpolation on electrodes.')
 n = 1;
-while (tol < epsilon)&&(n<8)
-  Pn = legendre(n, cos_gamma(:));
-  a  = (2*n+1) / (n*(n+1))^m;
-  gm = a * Pn(end,:)';
+while tol < epsilon
+  Pn = legendreP(n, cos_gamma(:));
+  a  = (2*n+1) / ((n*(n+1))^m);
+  gm = a * Pn;
   G  = horzcat(G, gm);
   LapG = horzcat(LapG, -n* (n+1)* gm);
-  %epsilon = max(abs( G(:,end)-G0 ))
-  epsilon = max(abs( G(:,end) ));
+  epsilon = max(abs( G(:,end)-G0 ));
+  %epsilon = max(abs( G(:,end) ));
   G0 = G(:,end);
   n = n + 1;
+  fprintf("  Fit error : %2.4d ,    Terms : %2d   \n", epsilon, n)
 end
 max_n = n-1;
 

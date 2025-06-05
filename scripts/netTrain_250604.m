@@ -14,8 +14,8 @@ info.OGelec     = 'icbm152_10_10_elec';
 
 info.SourceType = 'surface';
 
-info.nTrials    = 2;
-info.SNRvals    = [Inf, 30];
+info.nTrials    = 250;
+info.SNRvals    = [Inf, 30, 15, 0];
 
 info.ProtocolFun   = 'Protocol05';
 info.tagName       = 'test_deletable';
@@ -64,8 +64,8 @@ pre_laplace(info);
 %      gauss  ||J_n|| = exp( - dist(n, n*)^2 / 2*k^2 )
 %       circ  ||J_n|| = sqrt( 1 - [ dist(n, n*) / k ]^2 )
 
-%profiles = {'square', 'gauss', 'exp', 'circ'};
-profiles = {'gauss'};
+profiles = {'square', 'gauss', 'exp', 'circ'};
+%profiles = {'gauss'};
 
 for idxProfile = 1:length(profiles)
   curr_profile = profiles{idxProfile};
@@ -90,8 +90,8 @@ info.propTrain = 0.8;
 info.propTest  = 0.2;
 
 profiles2 = {'all', 'square'};
-%inputss   = {"SLap", "EEG", "WMNE", "EEG_SLap", "SLap_WMNE", "EEG_WMNE", "EEG_SLap_WMNE"};
-inputss   = {"SLap", "EEG", "WMNE"};
+inputss   = {"SLap", "EEG", "WMNE", "EEG_SLap", "SLap_WMNE", "EEG_WMNE", "EEG_SLap_WMNE"};
+%inputss   = {"SLap", "EEG", "WMNE"};
 for ii = 1:length(profiles2)
   info.TrainProfiles = profiles2{ii};
   for jj = 1:length(inputss)
