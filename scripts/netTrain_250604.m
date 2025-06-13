@@ -90,8 +90,9 @@ info.propTrain = 0.8;
 info.propTest  = 0.2;
 
 profiles2 = {'all', 'square'};
-inputss   = {"SLap", "EEG", "WMNE", "EEG_SLap", "SLap_WMNE", "EEG_WMNE", "EEG_SLap_WMNE"};
+inputss   = {"EEG", "WMNE", "SLap", "EEG_SLap", "SLap_WMNE", "EEG_WMNE", "EEG_SLap_WMNE"};
 %inputss   = {"SLap", "EEG", "WMNE"};
+
 for ii = 1:length(profiles2)
   info.TrainProfiles = profiles2{ii};
   for jj = 1:length(inputss)
