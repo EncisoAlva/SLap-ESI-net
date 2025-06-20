@@ -14,11 +14,11 @@ info.OGelec     = 'icbm152_10_10_elec';
 
 info.SourceType = 'surface';
 
-info.nTrials    = 250;
-info.SNRvals    = [Inf, 30, 15, 0];
+info.nTrials    = 1000;
+info.SNRvals    = [Inf, 30, 20, 10, 0];
 
 info.ProtocolFun   = 'Protocol05';
-info.tagName       = 'test_deletable';
+info.tagName       = 'test_deletable_allgauss';
 
 info.maxDepth  = 25; % unit: mm
 info.maxKappa  = 10*sqrt( 5/pi); % unit: mm
@@ -64,7 +64,7 @@ pre_laplace(info);
 %      gauss  ||J_n|| = exp( - dist(n, n*)^2 / 2*k^2 )
 %       circ  ||J_n|| = sqrt( 1 - [ dist(n, n*) / k ]^2 )
 
-profiles = {'square', 'gauss', 'exp', 'circ'};
+%profiles = {'square', 'gauss', 'exp', 'circ'};
 %profiles = {'gauss'};
 
 for idxProfile = 1:length(profiles)

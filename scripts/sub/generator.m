@@ -1,3 +1,4 @@
+
 function generator(info)
 % This function creates a set of test cases based on the sepcifications
 % included in the structure info.
