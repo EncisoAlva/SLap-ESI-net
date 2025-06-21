@@ -20,9 +20,9 @@ info.SNRvals    = [Inf, 30, 20, 10, 0];
 info.ProtocolFun   = 'Protocol05';
 info.tagName       = 'test_deletable_allgauss';
 
-info.maxDepth  = 25; % unit: mm
-info.maxKappa  = 10*sqrt( 5/pi); % unit: mm
-info.minKappa  = 10*sqrt(20/pi); % unit: mm
+info.maxDepth  =  25; % unit: mm
+info.maxKappa  =  10.5; % unit: mm
+info.minKappa  =  27; % unit: mm
 
 % for vol:  kap = 30.9 mm  ->  A = 30 cm^2
 % for srf:  kap = 30.9 mm  ->  A = 30 cm^2
@@ -65,7 +65,7 @@ pre_laplace(info);
 %       circ  ||J_n|| = sqrt( 1 - [ dist(n, n*) / k ]^2 )
 
 %profiles = {'square', 'gauss', 'exp', 'circ'};
-%profiles = {'gauss'};
+profiles = {'gauss'};
 
 for idxProfile = 1:length(profiles)
   curr_profile = profiles{idxProfile};
@@ -104,5 +104,5 @@ end
 
 %% evaluation
 
-evaluator(info);
-collector(info);
+%evaluator(info);
+%collector(info);
