@@ -27,14 +27,17 @@ info.minKappa  =  27; % unit: mm
 % for vol:  kap = 30.9 mm  ->  A = 30 cm^2
 % for srf:  kap = 30.9 mm  ->  A = 30 cm^2
 
-info.debugFigs  = true;
+info.minPatchs = 1;
+info.maxPatchs = 5;
+info.distPatch = 2*info.minKappa; % unit: mm
 
 info.debugCent  = false;
 info.debugCoord = [47.353, 18.555, 113.019];
 
-info.print_all = false;
-
 info.nLapGrid = 25;
+
+info.debugFigs  = true;
+info.print_all = false;
 
 %%
 % variables (may be moved to a function in the future)
@@ -72,7 +75,7 @@ for idxProfile = 1:length(profiles)
   info.BaseName      = [info.tagName, '_', curr_profile];
   info.SourceProfile = curr_profile;
   %
-  generator2(info);
+  generator3(info);
 end
 
 if false
@@ -89,9 +92,10 @@ info.LossFun  = "l2loss"; % also
 info.propTrain = 0.8;
 info.propTest  = 0.2;
 
-profiles2 = {'all', 'square'};
-inputss   = {"EEG", "WMNE", "SLap", "EEG_SLap", "SLap_WMNE", "EEG_WMNE", "EEG_SLap_WMNE"};
-%inputss   = {"SLap", "EEG", "WMNE"};
+profiles = {'gauss'};
+%profiles2 = {'all', 'square'};
+%inputss   = {"EEG", "WMNE", "SLap", "EEG_SLap", "SLap_WMNE", "EEG_WMNE", "EEG_SLap_WMNE"};
+inputss   = {"SLap", "EEG", "EEG_SLap"};
 
 for ii = 1:length(profiles2)
   info.TrainProfiles = profiles2{ii};

@@ -96,15 +96,17 @@ tmpOUT = preview(dTrain_out);
 % layers
 layers = [...
   inputLayer([size(tmpIN) 1], "CTB") ...
-  fullyConnectedLayer(300) ...
-  fullyConnectedLayer(300) ...
+  convolution2dLayer(3,8) ...
+  fullyConnectedLayer(512) ...
   fullyConnectedLayer(size(tmpOUT,1)) ...
   ];
+
+%%%% old architecture I used
 %layers = [...
-%  inputLayer([size(tmpSL) 1], "CTB") ...
-%  fullyConnectedLayer(300, WeightsInitializer="ones") ...
-%  fullyConnectedLayer(300, WeightsInitializer="ones") ...
-%  fullyConnectedLayer(size(tmpJ,1), WeightsInitializer="ones") ...
+%  inputLayer([size(tmpIN) 1], "CTB") ...
+%  fullyConnectedLayer(300) ...
+%  fullyConnectedLayer(300) ...
+%  fullyConnectedLayer(size(tmpOUT,1)) ...
 %  ];
 
 % options
@@ -144,5 +146,114 @@ saveFile = strcat( info.basePath, '\networks\', ...
   info.NetInput,".mat");
 
 save(saveFile,"netTrained");
+
+end
+
+%%
+
+function SY = customRead_SY( caseFile )
+%CUSTOMREAD Read function for Neural Network formatting
+%   In order to use neural networks optimally, the synthetic data must be
+%   organized on a format that the Deep Learning Toolbox would recognize.
+
+load(caseFile,'result');
+
+%outS = [];
+%J  = sparse(result.data.Jsparse);
+%SL = result.data.SL;
+SY = result.data.SY;
+
+end
+
+function SL = customRead_SL( caseFile )
+%CUSTOMREAD Read function for Neural Network formatting
+%   In order to use neural networks optimally, the synthetic data must be
+%   organized on a format that the Deep Learning Toolbox would recognize.
+
+load(caseFile,'result');
+
+%outS = [];
+%J  = sparse(result.data.Jsparse);
+SL = result.data.SL;
+%SY = result.data.SY;
+
+end
+
+function W = customRead_wmne( caseFile )
+%CUSTOMREAD Read function for Neural Network formatting
+%   In order to use neural networks optimally, the synthetic data must be
+%   organized on a format that the Deep Learning Toolbox would recognize.
+
+load(caseFile,'result');
+
+%outS = [];
+W  = full(result.data.J_WMNE);
+%SL = result.data.SL;
+%SY = result.data.SY;
+
+%W = [ result.data.SL; full(result.data.J_WMNE)];
+
+end
+
+function SLSY = customRead_SLSY( caseFile )
+%CUSTOMREAD Read function for Neural Network formatting
+%   In order to use neural networks optimally, the synthetic data must be
+%   organized on a format that the Deep Learning Toolbox would recognize.
+
+load(caseFile,'result');
+
+%outS = [];
+%J  = sparse(result.data.Jsparse);
+%SL = result.data.SL;
+%SY = result.data.SY;
+SLSY = [result.data.SL; result.data.SY];
+
+end
+
+function SYW = customRead_SYwmne( caseFile )
+%CUSTOMREAD Read function for Neural Network formatting
+%   In order to use neural networks optimally, the synthetic data must be
+%   organized on a format that the Deep Learning Toolbox would recognize.
+
+load(caseFile,'result');
+
+%outS = [];
+%W  = full(result.data.J_WMNE);
+%SL = result.data.SL;
+%SY = result.data.SY;
+
+SYW = [ result.data.SY; full(result.data.J_WMNE)];
+
+end
+
+function SLW = customRead_SLwmne( caseFile )
+%CUSTOMREAD Read function for Neural Network formatting
+%   In order to use neural networks optimally, the synthetic data must be
+%   organized on a format that the Deep Learning Toolbox would recognize.
+
+load(caseFile,'result');
+
+%outS = [];
+%J  = sparse(result.data.Jsparse);
+%SL = result.data.SL;
+%SY = result.data.SY;
+
+SLW = [ result.data.SL; full(result.data.J_WMNE)];
+
+end
+
+function SLSYW = customRead_SLSYwmne( caseFile )
+%CUSTOMREAD Read function for Neural Network formatting
+%   In order to use neural networks optimally, the synthetic data must be
+%   organized on a format that the Deep Learning Toolbox would recognize.
+
+load(caseFile,'result');
+
+%outS = [];
+%W  = full(result.data.J_WMNE);
+%SL = result.data.SL;
+%SY = result.data.SY;
+
+SLSYW = [ result.data.SL; result.data.SY; full(result.data.J_WMNE)];
 
 end
