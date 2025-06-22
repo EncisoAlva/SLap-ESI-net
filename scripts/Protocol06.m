@@ -1,5 +1,5 @@
 % This script creates a single trials of synthetic data according to 
-% protocol in the Multiple Source Preallocation Paper:
+% protocol in the ConvDip Paper:
 %  > Constrained dipoles at brain cortex
 %  > One single active dipole (given)
 %  > Sample freq = 15 Hz [actually irrelevant]
@@ -11,30 +11,29 @@
 % Author: Julio C Enciso-Alva (2025)
 %         juliocesar.encisoalva@mavs.uta.edu
 %
-function RES = Protocol05( meta, result, info )
+function RES = Protocol06( meta, result, info )
 
 RES = [];
+
+% same process for all patches, whatever number of them there are
+for idxPatch = 1:result.nPatches
 
 % optional: only consider sources with magnitude > 5%
 % the maximal draw distance depend on the profile
 switch info.SourceProfile
   case 'square'
-    maxDist = result.kappa;
+    maxDist = result.kappa(idxPatch);
   case 'exp'
-    maxDist = 4.61*result.kappa;
+    maxDist = 3.00*result.kappa(idxPatch);
   case 'gauss'
-    maxDist = 2.15*result.kappa;
+    maxDist = 2.45*result.kappa(idxPatch);
   case 'circ'
-    maxDist = result.kappa;
+    maxDist = result.kappa(idxPatch);
 end
 % prepare a short list of dipoles within the draw distance
 idx = 1:meta.nGridDips;
-idxShort = idx( vecnorm( meta.Gridloc - result.IntendedCent, 2, 2 ) < maxDist );
+idxShort = idx( vecnorm( meta.Gridloc - result.IntendedCent(idxPatch,:), 2, 2 ) < maxDist );
 nShort   = length( idxShort );
-%idxCentShort = find(result.idxCent == idxShort,1);
-%if isempty(idxCentShort)
-%  [~,idxCentShort] = min(vecnorm( meta.Gridloc(idxShort,:) - result.IntendedCent, 2, 2));
-%end
 switch info.SourceType
   case 'volume'
     Distance = vecnorm( meta.Gridloc(idxShort,:) - result.IntendedCent, 2, 2 );
@@ -79,6 +78,8 @@ switch info.SourceType
     J(idxShort) = normJshort;
 end
 RES.Jsparse = sparse(J);
+
+end
 
 %fprintf('Jsparse is ok')
 
