@@ -15,20 +15,30 @@ function RES = Protocol06( meta, result, info )
 
 RES = [];
 
+% shared container
+normJ_shared = zeros(meta.nGridDips,1);
+switch info.SourceType
+  case 'volume'
+    J_shared = zeros(meta.nGridDips*3,1);
+  case 'surface'
+    J_shared = zeros(meta.nGridDips  ,1);
+end
+
 % same process for all patches, whatever number of them there are
 for idxPatch = 1:result.nPatches
 
 % optional: only consider sources with magnitude > 5%
 % the maximal draw distance depend on the profile
+kappa = result.kappa(idxPatch);
 switch info.SourceProfile
   case 'square'
-    maxDist = result.kappa(idxPatch);
+    maxDist = kappa;
   case 'exp'
-    maxDist = 3.00*result.kappa(idxPatch);
+    maxDist = 3.00*kappa;
   case 'gauss'
-    maxDist = 2.45*result.kappa(idxPatch);
+    maxDist = 2.45*kappa;
   case 'circ'
-    maxDist = result.kappa(idxPatch);
+    maxDist = kappa;
 end
 % prepare a short list of dipoles within the draw distance
 idx = 1:meta.nGridDips;
@@ -36,26 +46,26 @@ idxShort = idx( vecnorm( meta.Gridloc - result.IntendedCent(idxPatch,:), 2, 2 ) 
 nShort   = length( idxShort );
 switch info.SourceType
   case 'volume'
-    Distance = vecnorm( meta.Gridloc(idxShort,:) - result.IntendedCent, 2, 2 );
+    Distance = vecnorm( meta.Gridloc(idxShort,:) - result.IntendedCent(idxPatch,:), 2, 2 );
   case 'surface'
-    [~,GraphDist] = shortestpathtree(meta.asGraph, result.idxCent, idxShort );
+    [~,GraphDist] = shortestpathtree(meta.asGraph, result.idxCent(idxPatch), idxShort );
     Distance = GraphDist;
 end
 
 %fprintf('Distance is ok')
 
 % J, shortened to non-zero dipoles
-RES.time       = linspace(0,0,1);
+RES.time   = linspace(0,0,1);
 normJshort = zeros(nShort,1);
 switch info.SourceProfile
   case 'square'
-    normJshort( Distance < result.kappa ) = 1;
+    normJshort( Distance < kappa ) = 1;
   case 'exp'
-    normJshort = exp(- Distance /result.kappa);
+    normJshort = exp(- Distance /kappa);
   case 'gauss'
-    normJshort = exp(-( Distance ).^2/(2*(result.kappa^2)));
+    normJshort = exp(-( Distance ).^2/(2*(kappa^2)));
   case 'circ'
-    normJshort = ( 1 - min( Distance /result.kappa,1 ).^2 ).^(1/2);
+    normJshort = ( 1 - min( Distance /kappa,1 ).^2 ).^(1/2);
 end
 normJshort( normJshort < max(abs( normJshort ))*0.05 ) = 0; % sparse enforce
 normJshort = normJshort / sqrt(sum( normJshort.^2 ));
@@ -63,23 +73,22 @@ normJshort = normJshort / sqrt(sum( normJshort.^2 ));
 % inflate and make sparse (for storage)
 normJ = zeros(meta.nGridDips,1);
 normJ(idxShort) = normJshort;
-RES.normJsparse = sparse(normJ);
+%RES.normJsparse = sparse(normJ);
 
-%fprintf('normJsparse is ok')
-
-% add chosen orientation if it is a volume source
 switch info.SourceType
   case 'volume'
-    J = zeros(meta.nGridDips*3,1);
-    tmp = (idxShort-1)*3 + [1,2,3]';
-    J(sort(tmp(:))) = kron(normJshort, result.Orient');
+    J = kron(normJ, result.Orient(idxPatch,:)');
   case 'surface'
-    J = zeros(meta.nGridDips  ,1);
-    J(idxShort) = normJshort;
+    J = normJshort*result.Orient(idxPatch);
 end
-RES.Jsparse = sparse(J);
+%RES.Jsparse = sparse(J);
+
+J_shared = J_shared + J;
 
 end
+
+RES.normJsparse = sparse(normJ_shared);
+RES.Jsparse     = sparse(    J_shared);
 
 %fprintf('Jsparse is ok')
 

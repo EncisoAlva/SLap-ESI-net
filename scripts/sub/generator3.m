@@ -275,11 +275,16 @@ for SNRi = info.SNRvals
         end
       end
     end
-    %
-    result.IntendedCent = zeros(3,result.nPatches);
-    for i = 1:result.nPatches
-      tmp = randn(3,1);
-      result.Orient(:,1) = tmp / norm(tmp);
+    switch info.SourceType
+      case 'surface'
+        % orientation is only +-1
+        result.Orient = randsample([1, -1],result.nPatches,true);
+      case 'volume'
+        % orientation is random on a unit sphere
+        for i = 1:result.nPatches
+          tmp = randn(3,1);
+          result.Orient(:,i) = tmp / norm(tmp);
+        end
     end
     % extension is either (1) a given value, or (2) randomized within a range
     if info.minKappa == info.maxKappa
