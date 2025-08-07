@@ -2,7 +2,7 @@
 % protocol in the ConvDip Paper:
 %  > Constrained dipoles at brain cortex
 %  > One single active dipole (given)
-%  > Sample freq = 15 Hz [actually irrelevant]
+%  > Sample freq = 15 Hz [actually irrelevant, only 1 point is used]
 %  > Sample window = 1/15 sec, ie one single timepoint
 %  > Total points: 1
 %  > Signal: [Deprecated for the moment]
@@ -16,7 +16,7 @@ function RES = Protocol06( meta, result, info )
 RES = [];
 
 % shared container
-normJ_shared = zeros(meta.nGridDips,1);
+%normJ_shared = zeros(meta.nGridDips,1);
 switch info.SourceType
   case 'volume'
     J_shared = zeros(meta.nGridDips*3,1);
@@ -87,16 +87,21 @@ J_shared = J_shared + J;
 
 end
 
+% order output in desired format
+switch info.SourceType
+  case 'volume'
+    J_shared_vec = reshape( J_shared, [3, meta.nGridDips] );
+    normJ_shared = vecnorm( J_shared_vec, 3, 1);
+  case 'surface'
+    normJ_shared = abs( J_shared );
+end
+
 RES.normJsparse = sparse(normJ_shared);
 RES.Jsparse     = sparse(    J_shared);
-
-%fprintf('Jsparse is ok')
 
 % Y, noiseless
 RES.Yclean = meta.Leadfield * J;
 RES.varY   = RES.Yclean.^2;
-
-%fprintf('Yclean is ok')
 
 % adding noise to a prescribed SNR
 if isinf(result.SNR)
@@ -153,122 +158,4 @@ set(gca,'LooseInset',get(gca,'TightInset'))
 %fig.OuterPosition = [0 0 3 3];
 %exportgraphics(gcf,[info.SourceProfile, '_center.pdf'],'Resolution',600)
 
-end
-
-function DebugPlotTrueSourceDistribution(meta, info, RES)
-% source patch distribution
-figure()
-
-J = full(RES.Jsparse);
-trisurf(meta.Cortex.Faces, ...
-  meta.Cortex.Vertices(:,1), meta.Cortex.Vertices(:,2), meta.Cortex.Vertices(:,3), ...
-  'FaceColor', [1,1,1]*153/255, ...
-  'EdgeColor', ...
-  'none', 'FaceAlpha', 1 )
-view([ 90  90]) % top
-camlight('headlight', 'infinite')
-material dull
-  
-% plot source distribution
-hold on
-trisurf(meta.Cortex.Faces, ...
-  meta.Cortex.Vertices(:,1), meta.Cortex.Vertices(:,2), meta.Cortex.Vertices(:,3), ...
-  'FaceColor', 'interp', ...
-  'FaceVertexCData', abs(J), ...
-  'EdgeColor', 'none', ...
-  'FaceAlpha', 'interp', ...
-  'FaceVertexAlphaData', 1*(abs(J)>0.05*max(abs(J(:)))) )
-material dull
-%colormap("turbo")
-colormap("parula")
-clim([0,1])
-  
-% remove grids and stuff
-grid off
-set(gca,'DataAspectRatio',[1 1 1])
-set(gca,'XColor', 'none','YColor','none','ZColor','none')
-set(gca, 'color', 'none');
-set(gcf,'color','w');
-set(gca,'LooseInset',get(gca,'TightInset'))
-  
-% labels
-switch info.SourceProfile
-  case 'square'
-    title('Square profile')
-  case 'exp'
-    title('Exponential profile')
-  case 'gauss'
-    title('Gaussian profile')
-  case 'circ'
-    title('Polynomial profile')
-end
-  
-% configure for export
-%fig = gcf;
-%fig.Units = 'inches';
-%fig.OuterPosition = [0 0 3 3];
-%exportgraphics(gcf,[info.SourceProfile, '_GroundTruth.pdf'],'Resolution',600)
-end
-
-function DebugPlotTrueProfile(meta, info, RES)
-% PROFILE GRAPH
-figure()
-fig = tiledlayout(1,1,'Padding','tight');
-nexttile
-
-% optional: only consider sources with magnitude > 5%
-% the maximal draw distance depend on the profile
-switch info.SourceProfile
-  case 'square'
-    maxDist = result.kappa;
-  case 'exp'
-    maxDist = 4.61*result.kappa;
-  case 'gauss'
-    maxDist = 2.15*result.kappa;
-  case 'circ'
-    maxDist = result.kappa;
-end
-
-% prepare a short list of dipoles within the draw distance
-idx = 1:meta.nGridDips;
-idxShort = idx( vecnorm( meta.Gridloc - result.IntendedCent, 2, 2 ) < maxDist );
-switch info.SourceType
-  case 'volume'
-    Distance = vecnorm( meta.Gridloc(idxShort,:) - result.IntendedCent, 2, 2 );
-  case 'surface'
-    [~,GraphDist] = shortestpathtree(meta.asGraph, result.idxCent, idxShort );
-    Distance = GraphDist;
-end
-
-% load source patch information
-J = full(RES.Jsparse);
-normJ2 = abs( J(idxShort) ).^2;
-
-% geodesic distance in cortex
-scatter( Distance, normJ2, "filled" )
-  
-% labels
-switch info.SourceProfile
-  case 'square'
-    title('Square profile')
-  case 'exp'
-    title('Exponential profile')
-  case 'gauss'
-    title('Gaussian profile')
-  case 'circ'
-    title('Polynomial profile')
-end
-xlabel('dist$(\mathbf{r}_n, \mathbf{r}_{n^*})$ [mm]','Interpreter','latex')
-ylabel('$\Vert \mathbf{J} \Vert^2_2$', 'Interpreter','latex')
-xlim([0, 30])
-ylim([0,1])
-  
-% add grid
-grid on
-set(gcf,'color','w');
-
-% configure for export
-%fig.Units = 'inches';
-%fig.OuterPosition = [0 0 3 3];
-%exportgraphics(gcf,[info.SourceProfile, '_Profile.pdf'],'Resolution',600)
 end
